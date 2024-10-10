@@ -130,7 +130,7 @@ const Modules = [
     label: "Gymkhana",
     id: "gymkhana",
     icon: <GymkhanaIcon size={18} />,
-    url: "/GymKhana",
+    url: "/",
   },
   {
     label: "Institute Work Departments",
