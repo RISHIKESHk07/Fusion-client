@@ -1,8 +1,5 @@
-import { useState, Suspense, lazy } from "react";
-import { useSelector } from "react-redux";
 import {
   Box,
-  Button,
   Container,
   Group,
   Paper,
@@ -10,6 +7,10 @@ import {
   Tabs,
   Text,
 } from "@mantine/core";
+import { Suspense, lazy, useState } from "react";
+import { useSelector } from "react-redux";
+
+import EventComponent from "./EventComponent";
 
 const ClubViewComponent = lazy(() => import("./ClubViewComponent"));
 
@@ -34,7 +35,7 @@ function GymkhanaDashboard() {
         <Tabs.Panel value="Clubs" h="100vh">
           <Group justify="end" mt="5px">
             <Select
-              data={["TPC", "AFC"]}
+              data={["TPC", "AFC", "ERS", "APS"]}
               value={value}
               placeholder="Select a Club"
               onChange={setValue}
@@ -102,7 +103,7 @@ function GymkhanaDashboard() {
                 </Container>
               </Paper>
             ) : (
-              <Suspense fallback={<div>Loading .......</div>}>
+              <Suspense fallback={<div>Loading right now</div>}>
                 <ClubViewComponent
                   clubName={value}
                   membersData={[
@@ -138,23 +139,26 @@ function GymkhanaDashboard() {
           </Box>
         </Tabs.Panel>
 
+        {/* Calendar Tab */}
         <Tabs.Panel value="Calender" h="100vh">
           <Container mt="10px" mx="0" my="xs">
-            <Button>Filter Button</Button>
+            {/* <Button>Filter Button</Button> */}
           </Container>
-          <Container>Calender Component falls over here</Container>
+          <Container>
+            {/* <CalendarComponent /> Your custom calendar component */}
+          </Container>
         </Tabs.Panel>
 
         <Tabs.Panel value="Fests" h="100vh">
           <Container mt="10px" mx="0" my="xs">
-            Previous Fests Component falls over here
+            {/* <FestComponent /> */}
           </Container>
           {/* need to make page where we have previous Fests listed here in Table */}
         </Tabs.Panel>
 
         <Tabs.Panel value="Events" h="100vh">
           <Container mt="10px" mx="0" my="xs">
-            Need to fetch Events from the APIS over here
+            <EventComponent />
           </Container>
           {/* need to make a Table with previous Events in Campus */}
         </Tabs.Panel>
