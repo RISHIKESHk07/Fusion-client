@@ -1,15 +1,9 @@
-import { useState } from "react";
+import { Container, Group, Paper, Select, Tabs, Text } from "@mantine/core";
+import { Suspense, lazy, useState } from "react";
 import { useSelector } from "react-redux";
-import {
-  Button,
-  Container,
-  Group,
-  Paper,
-  Select,
-  Tabs,
-  Text,
-} from "@mantine/core";
-import ClubViewComponent from "./ClubViewComponent";
+import EventComponent from "./EventComponent";
+
+const ClubViewComponent = lazy(() => import("./ClubViewComponent"));
 
 function GymkhanaDashboard() {
   const user = useSelector((state) => state.user);
@@ -32,7 +26,7 @@ function GymkhanaDashboard() {
         <Tabs.Panel value="Clubs" h="100vh">
           <Group justify="end" mt="5px">
             <Select
-              data={["TPC", "AFC"]}
+              data={["TPC", "AFC", "ERS", "APS"]}
               value={value}
               placeholder="Select a Club"
               onChange={setValue}
@@ -100,57 +94,62 @@ function GymkhanaDashboard() {
                 </Container>
               </Paper>
             ) : (
-              <ClubViewComponent
-                clubName={value}
-                membersData={[
-                  { name: "John Doe", role: "President" },
-                  { name: "Jane Smith", role: "Vice President" },
-                  // add more members here
-                ]}
-                achievementsData={[
-                  { title: "First Place at Hackathon", year: "2022" },
-                  { title: "Best Club Award", year: "2023" },
-                  // add more achievements here
-                ]}
-                eventsData={[
-                  { name: "Coding Bootcamp", date: "2024-01-15" },
-                  { name: "Tech Fest", date: "2024-03-10" },
-                  // add more events here
-                ]}
-                membersColumns={[
-                  { accessorKey: "name", header: "Name" },
-                  { accessorKey: "role", header: "Role" },
-                ]}
-                achievementsColumns={[
-                  { accessorKey: "title", header: "Title" },
-                  { accessorKey: "year", header: "Year" },
-                ]}
-                eventsColumns={[
-                  { accessorKey: "name", header: "Event Name" },
-                  { accessorKey: "date", header: "Date" },
-                ]}
-              />
+              <Suspense fallback={<div>Loading right now</div>}>
+                <ClubViewComponent
+                  clubName={value}
+                  membersData={[
+                    { name: "John Doe", role: "President" },
+                    { name: "Jane Smith", role: "Vice President" },
+                    // add more members here
+                  ]}
+                  achievementsData={[
+                    { title: "First Place at Hackathon", year: "2022" },
+                    { title: "Best Club Award", year: "2023" },
+                    // add more achievements here
+                  ]}
+                  eventsData={[
+                    { name: "Coding Bootcamp", date: "2024-01-15" },
+                    { name: "Tech Fest", date: "2024-03-10" },
+                    // add more events here
+                  ]}
+                  membersColumns={[
+                    { accessorKey: "name", header: "Name" },
+                    { accessorKey: "role", header: "Role" },
+                  ]}
+                  achievementsColumns={[
+                    { accessorKey: "title", header: "Title" },
+                    { accessorKey: "year", header: "Year" },
+                  ]}
+                  eventsColumns={[
+                    { accessorKey: "name", header: "Event Name" },
+                    { accessorKey: "date", header: "Date" },
+                  ]}
+                />
+              </Suspense>
             )}
           </Container>
         </Tabs.Panel>
 
+        {/* Calendar Tab */}
         <Tabs.Panel value="Calender" h="100vh">
           <Container mt="10px" mx="0" my="xs">
-            <Button>Filter Button</Button>
+            {/* <Button>Filter Button</Button> */}
           </Container>
-          <Container>Calender Component falls over here</Container>
+          <Container>
+            {/* <CalendarComponent /> Your custom calendar component */}
+          </Container>
         </Tabs.Panel>
 
         <Tabs.Panel value="Fests" h="100vh">
           <Container mt="10px" mx="0" my="xs">
-            Previous Fests Component falls over here
+            {/* <FestComponent /> */}
           </Container>
           {/* need to make page where we have previous Fests listed here in Table */}
         </Tabs.Panel>
 
         <Tabs.Panel value="Events" h="100vh">
           <Container mt="10px" mx="0" my="xs">
-            Need to fetch Events from the APIS over here
+            <EventComponent />
           </Container>
           {/* need to make a Table with previous Events in Campus */}
         </Tabs.Panel>
