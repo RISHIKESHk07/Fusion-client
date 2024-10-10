@@ -1,12 +1,11 @@
 import { Container, Group, Stack, Tabs, Text } from "@mantine/core";
 import { useState, lazy, Suspense } from "react";
 import { useSelector } from "react-redux";
-import PropTypes from "prop-types";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "mantine-react-table/styles.css";
+import RegistrationForm from "./RegistrationForm";
 
-const RegistrationForm = lazy(() => import("./RegistrationForm"));
 const CustomTable = lazy(() => import("./CustomTable"));
 function ClubViewComponent({
   clubName,
@@ -131,51 +130,5 @@ function ClubViewComponent({
     </Container>
   );
 }
-
-ClubViewComponent.propTypes = {
-  clubName: PropTypes.string.isRequired,
-
-  membersData: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      role: PropTypes.string.isRequired,
-    }),
-  ).isRequired,
-
-  achievementsData: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      year: PropTypes.string.isRequired,
-    }),
-  ).isRequired,
-
-  eventsData: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      date: PropTypes.string.isRequired,
-    }),
-  ).isRequired,
-
-  membersColumns: PropTypes.arrayOf(
-    PropTypes.shape({
-      accessorKey: PropTypes.string.isRequired,
-      header: PropTypes.string.isRequired,
-    }),
-  ).isRequired,
-
-  achievementsColumns: PropTypes.arrayOf(
-    PropTypes.shape({
-      accessorKey: PropTypes.string.isRequired,
-      header: PropTypes.string.isRequired,
-    }),
-  ).isRequired,
-
-  eventsColumns: PropTypes.arrayOf(
-    PropTypes.shape({
-      accessorKey: PropTypes.string.isRequired,
-      header: PropTypes.string.isRequired,
-    }),
-  ).isRequired,
-};
 
 export default ClubViewComponent;

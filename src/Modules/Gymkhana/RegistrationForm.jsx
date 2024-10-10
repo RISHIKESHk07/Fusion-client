@@ -1,15 +1,20 @@
 import React from "react";
 import { useForm, isEmail } from "@mantine/form";
-import { TextInput, Textarea, Button, Group, Container } from "@mantine/core";
+import {
+  TextInput,
+  NumberInput,
+  Textarea,
+  Button,
+  Group,
+  Container,
+} from "@mantine/core";
 
-import "./GymkhanaForms.css";
-import PropTypes from "prop-types";
-
-function ClubRegistrationForm() {
+function ClubRegistrationForm({ clubName }) {
   // Set up the form with initial values and validation
   const form = useForm({
     initialValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       rollNumber: null,
       email: "",
       achievements: "",
@@ -17,10 +22,12 @@ function ClubRegistrationForm() {
     },
 
     validate: {
-      name: (value) =>
+      firstName: (value) =>
         value.length < 2 ? "First name must have at least 2 letters" : null,
+      lastName: (value) =>
+        value.length < 2 ? "Last name must have at least 2 letters" : null,
       rollNumber: (value) =>
-        value.length < 2 ? "Roll no must have at least 8 letters" : null,
+        value <= 0 ? "Roll number must be a positive number" : null,
       email: (value) => (isEmail(value) ? null : "Invalid email format"),
     },
   });
@@ -33,28 +40,28 @@ function ClubRegistrationForm() {
 
   return (
     <Container>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="club-form">
-        {/* Name */}
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        {/* First Name */}
         <TextInput
-          label="Name"
-          placeholder="Enter your name"
-          value={form.values.name}
-          onChange={(event) =>
-            form.setFieldValue("name", event.currentTarget.value)
-          }
-          error={form.errors.name}
+          label="First Name"
+          placeholder="Enter your first name"
+          {...form.getInputProps("firstName")}
+          withAsterisk
+        />
+
+        {/* Last Name */}
+        <TextInput
+          label="Last Name"
+          placeholder="Enter your last name"
+          {...form.getInputProps("lastName")}
           withAsterisk
         />
 
         {/* Roll Number */}
-        <TextInput
+        <NumberInput
           label="Roll Number"
           placeholder="Enter your roll number"
-          value={form.values.rollNumber}
-          onChange={(event) =>
-            form.setFieldValue("rollNumber", event.currentTarget.value)
-          }
-          error={form.errors.rollNumber}
+          {...form.getInputProps("rollNumber")}
           withAsterisk
         />
 
@@ -62,11 +69,7 @@ function ClubRegistrationForm() {
         <TextInput
           label="Email"
           placeholder="Enter your email"
-          value={form.values.email}
-          onChange={(event) =>
-            form.setFieldValue("email", event.currentTarget.value)
-          }
-          error={form.errors.email}
+          {...form.getInputProps("email")}
           withAsterisk
         />
 
@@ -74,27 +77,19 @@ function ClubRegistrationForm() {
         <Textarea
           label="Achievements"
           placeholder="Describe your achievements"
-          value={form.values.achievements}
-          onChange={(event) =>
-            form.setFieldValue("achievements", event.currentTarget.value)
-          }
+          {...form.getInputProps("achievements")}
         />
 
         {/* Experience */}
         <Textarea
           label="Experience"
           placeholder="Describe your experience"
-          value={form.values.experience}
-          onChange={(event) =>
-            form.setFieldValue("experience", event.currentTarget.value)
-          }
+          {...form.getInputProps("experience")}
         />
 
         {/* Submit Button */}
         <Group position="center" mt="md">
-          <Button type="submit" className="submit-btn">
-            Submit
-          </Button>
+          <Button type="submit">Submit</Button>
         </Group>
       </form>
     </Container>
@@ -106,15 +101,10 @@ export { ClubRegistrationForm };
 function RegistrationForm({ clubName }) {
   return (
     <Container>
-      <h2 className="club-header">
-        Hello from {clubName} - Enter your details for Registering !!!
-      </h2>
+      <h2>Hello from {clubName} - Enter your details for Registering !!!</h2>
       <ClubRegistrationForm clubName={clubName} />
     </Container>
   );
 }
-RegistrationForm.propTypes = {
-  clubName: PropTypes.string.isRequired,
-};
 
 export default RegistrationForm;
