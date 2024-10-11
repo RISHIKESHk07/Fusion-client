@@ -105,6 +105,7 @@ function GymkhanaDashboard() {
             ) : (
               <Suspense fallback={<div>Loading right now</div>}>
                 <ClubViewComponent
+                  AboutClub={`${value} is the club we are talking about `}
                   clubName={value}
                   membersData={[
                     { name: "John Doe", role: "President" },

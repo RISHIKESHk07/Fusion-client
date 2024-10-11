@@ -1,6 +1,6 @@
 import "@mantine/core/styles.css";
-import "@mantine/dates/styles.css"; //if using mantine date picker features
-import "mantine-react-table/styles.css"; //make sure MRT styles were imported in your app root (once)
+import "@mantine/dates/styles.css";
+import "mantine-react-table/styles.css";
 import {
   flexRender,
   MRT_GlobalFilterTextInput,
@@ -10,6 +10,7 @@ import {
   MRT_TableBodyCellValue,
 } from "mantine-react-table";
 import { Divider, Flex, Stack, Table, Title } from "@mantine/core";
+import PropTypes from "prop-types";
 
 function CustomTable({ data, columns }) {
   const table = useMantineReactTable({
@@ -32,7 +33,9 @@ function CustomTable({ data, columns }) {
       <Divider />
       <Title order={4}>My Custom Headless Table</Title>
       <Flex justify="space-between" align="center">
+        {/* eslint-disable-next-line react/jsx-pascal-case */}
         <MRT_GlobalFilterTextInput table={table} />
+        {/* eslint-disable-next-line react/jsx-pascal-case */}
         <MRT_TablePagination table={table} />
       </Flex>
 
@@ -69,6 +72,7 @@ function CustomTable({ data, columns }) {
             <Table.Tr key={row.id}>
               {row.getVisibleCells().map((cell) => (
                 <Table.Td key={cell.id}>
+                  {/* eslint-disable-next-line react/jsx-pascal-case */}
                   <MRT_TableBodyCellValue cell={cell} table={table} />
                 </Table.Td>
               ))}
@@ -76,9 +80,22 @@ function CustomTable({ data, columns }) {
           ))}
         </Table.Tbody>
       </Table>
+      {/* eslint-disable-next-line react/jsx-pascal-case */}
       <MRT_ToolbarAlertBanner stackAlertBanner table={table} />
     </Stack>
   );
 }
+
+CustomTable.propTypes = {
+  data: PropTypes.arrayOf({
+    [PropTypes.string]: PropTypes,
+  }).isRequired,
+  columns: PropTypes.arrayOf(
+    PropTypes.shape({
+      accessorKey: PropTypes.string.isRequired,
+      header: PropTypes.string.isRequired,
+    }),
+  ).isRequired,
+};
 
 export default CustomTable;
