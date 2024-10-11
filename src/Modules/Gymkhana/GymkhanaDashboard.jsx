@@ -144,9 +144,7 @@ function GymkhanaDashboard() {
           <Container mt="10px" mx="0" my="xs">
             {/* <Button>Filter Button</Button> */}
           </Container>
-          <Container>
-            {/* <CalendarComponent /> Your custom calendar component */}
-          </Container>
+          <Container />
         </Tabs.Panel>
 
         <Tabs.Panel value="Fests" h="100vh">
