@@ -11,6 +11,7 @@ const CustomTable = lazy(() => import("./CustomTable"));
 const EventForm = lazy(() => import("./EventForm"));
 const BudgetForm = lazy(() => import("./BudgetForm"));
 function ClubViewComponent({
+  AboutClub,
   clubName,
   membersData,
   achievementsData,
@@ -25,7 +26,24 @@ function ClubViewComponent({
   const renderActiveContent = () => {
     switch (activeclubfeature) {
       case "About":
-        return <Text>This is the about section for the {clubName} club.</Text>;
+        return (
+          <Text>
+            This is the about section for the {clubName} club.Lorem ipsum is a
+            placeholder text commonly used in design, typesetting, and web
+            development to demonstrate the visual form of a document or a
+            typeface without relying on meaningful content. The text is derived
+            from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et
+            Malorum," a 45 BC work by Cicero, and is often used because it
+            approximates the distribution of letters in English, providing a
+            natural look to layouts. The standard "Lorem ipsum" text has been
+            used in the printing industry since the 1500s when an unknown
+            printer scrambled parts of Cicero's text to create a type specimen
+            book. Since then, it has become the industry's default placeholder
+            text, maintaining its popularity through centuries of evolving
+            design and printing technology.
+            {AboutClub}
+          </Text>
+        );
       case "Members":
         return (
           <Suspense fallback={<div>Loading Members Table</div>}>
@@ -145,7 +163,7 @@ function ClubViewComponent({
 
 ClubViewComponent.propTypes = {
   clubName: PropTypes.string.isRequired,
-
+  AboutClub: PropTypes.string.isRequired,
   membersData: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
@@ -156,14 +174,14 @@ ClubViewComponent.propTypes = {
   achievementsData: PropTypes.arrayOf(
     PropTypes.shape({
       title: PropTypes.string.isRequired,
-      year: PropTypes.string.isRequired,
+      year: PropTypes.string.isRequired, // Assuming year is a string, e.g., "2022"
     }),
   ).isRequired,
 
   eventsData: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
-      date: PropTypes.string.isRequired,
+      date: PropTypes.string.isRequired, // Assuming date is a string in "YYYY-MM-DD" format
     }),
   ).isRequired,
 

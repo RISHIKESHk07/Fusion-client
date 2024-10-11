@@ -1,29 +1,31 @@
+/* eslint-disable react/prop-types, radix, react/jsx-pascal-case */
+
+import { Divider, Flex, Stack, Table, Title } from "@mantine/core";
 import "@mantine/core/styles.css";
-import "@mantine/dates/styles.css";
-import "mantine-react-table/styles.css";
+import "@mantine/dates/styles.css"; // if using mantine date picker features
 import {
-  flexRender,
   MRT_GlobalFilterTextInput,
+  MRT_TableBodyCellValue,
   MRT_TablePagination,
   MRT_ToolbarAlertBanner,
+  flexRender,
   useMantineReactTable,
-  MRT_TableBodyCellValue,
 } from "mantine-react-table";
-import { Divider, Flex, Stack, Table, Title } from "@mantine/core";
-import PropTypes from "prop-types";
+import "mantine-react-table/styles.css"; // make sure MRT styles were imported in your app root (once)
 
-function CustomTable({ data, columns }) {
+function SpecialTable({ columns, data, rowOptions }) {
   const table = useMantineReactTable({
     columns,
-    data,
+    data, // must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
+    // MRT display columns can still work, optionally override cell renders with `displayColumnDefOptions`
     enableRowSelection: true,
     initialState: {
-      pagination: { pageSize: 5, pageIndex: 0 },
+      pagination: { pageSize: parseInt(rowOptions[0]), pageIndex: 0 },
       showGlobalFilter: true,
     },
-
+    // customize the MRT components
     mantinePaginationProps: {
-      rowsPerPageOptions: ["5", "10", "15"],
+      rowsPerPageOptions: rowOptions,
     },
     paginationDisplayMode: "pages",
   });
@@ -31,14 +33,16 @@ function CustomTable({ data, columns }) {
   return (
     <Stack>
       <Divider />
-      <Title order={4}>My Custom Headless Table</Title>
+      <Title order={4}>Events List</Title>
       <Flex justify="space-between" align="center">
-        {/* eslint-disable-next-line react/jsx-pascal-case */}
+        {/**
+         * Use MRT components along side your own markup.
+         * They just need the `table` instance passed as a prop to work!
+         */}
         <MRT_GlobalFilterTextInput table={table} />
-        {/* eslint-disable-next-line react/jsx-pascal-case */}
         <MRT_TablePagination table={table} />
       </Flex>
-
+      {/* Using Vanilla Mantine Table component here */}
       <Table
         captionSide="top"
         fz="md"
@@ -50,6 +54,7 @@ function CustomTable({ data, columns }) {
         withColumnBorders
         m="0"
       >
+        {/* Use your own markup or stock Mantine components, customize however you want using the power of TanStack Table */}
         <Table.Thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <Table.Tr key={headerGroup.id}>
@@ -72,7 +77,6 @@ function CustomTable({ data, columns }) {
             <Table.Tr key={row.id}>
               {row.getVisibleCells().map((cell) => (
                 <Table.Td key={cell.id}>
-                  {/* eslint-disable-next-line react/jsx-pascal-case */}
                   <MRT_TableBodyCellValue cell={cell} table={table} />
                 </Table.Td>
               ))}
@@ -80,22 +84,9 @@ function CustomTable({ data, columns }) {
           ))}
         </Table.Tbody>
       </Table>
-      {/* eslint-disable-next-line react/jsx-pascal-case */}
       <MRT_ToolbarAlertBanner stackAlertBanner table={table} />
     </Stack>
   );
 }
 
-CustomTable.propTypes = {
-  data: PropTypes.arrayOf({
-    [PropTypes.string]: PropTypes,
-  }).isRequired,
-  columns: PropTypes.arrayOf(
-    PropTypes.shape({
-      accessorKey: PropTypes.string.isRequired,
-      header: PropTypes.string.isRequired,
-    }),
-  ).isRequired,
-};
-
-export default CustomTable;
+export default SpecialTable;
