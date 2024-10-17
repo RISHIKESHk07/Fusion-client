@@ -4,12 +4,66 @@ import "mantine-react-table/styles.css"; // make sure MRT styles were imported i
 import { useMemo, useState } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import { ActionIcon, Flex, Tooltip } from "@mantine/core";
-import { IconEye, IconTrash } from "@tabler/icons-react";
+import { IconTrash, IconCheck } from "@tabler/icons-react";
 import PropTypes from "prop-types";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 import { useGetClubMembers } from "./BackendLogic/ApiRoutes";
 
+const token = localStorage.getItem("authToken");
+
 function CoordinatorMembers({ clubName }) {
-  const [validationErrors, setValidationErrors] = useState({});
+  const [setMessage] = useState({ type: "", text: "" });
+  const [validationErrors] = useState({});
+  const approvemutation = useMutation({
+    mutationFn: (clubMemberId) => {
+      return axios.post(
+        "http://localhost:8000/gymkhana/api/member_approve/",
+        { id: clubMemberId },
+        {
+          headers: {
+            Authorization: `Token ${token}`, // Token for Authorization
+          },
+        },
+      );
+    },
+    onSuccess: (response) => {
+      console.log("Successfully approved:", response.data);
+      setMessage({ type: "success", text: "Approval successful!" });
+    },
+    onError: (error) => {
+      console.error("Error during approval:", error);
+      setMessage({
+        type: "error",
+        text: "Approval failed. Please try again.",
+      });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (clubMemberId) => {
+      return axios.post(
+        "http://localhost:8000/gymkhana/api/member_reject/",
+        { id: clubMemberId },
+        {
+          headers: {
+            Authorization: `Token ${token}`, // Token for Authorization
+          },
+        },
+      );
+    },
+    onSuccess: (response) => {
+      console.log("Successfully rejected:", response.data);
+      setMessage({ type: "success", text: "Rejection successful!" });
+    },
+    onError: (error) => {
+      console.error("Error during rejection:", error);
+      setMessage({
+        type: "error",
+        text: "Rejection failed. Please try again.",
+      });
+    },
+  });
 
   const columns = useMemo(
     () => [
@@ -58,16 +112,33 @@ function CoordinatorMembers({ clubName }) {
       : undefined,
     renderRowActions: ({ row }) => (
       <Flex gap="md">
-        <Tooltip label="Delete">
-          <ActionIcon
-            color="red"
-            onClick={() => {
-              /* Implement delete logic */
-            }}
-          >
-            <IconTrash />
-          </ActionIcon>
-        </Tooltip>
+        {row.original.status === "open" ? (
+          // Approve icon for open status
+          <Tooltip label="Approve">
+            <ActionIcon
+              color="green"
+              onClick={() => {
+                setMessage({ type: "", text: "" }); // Reset message
+                approvemutation.mutate(row.original.id);
+              }}
+            >
+              <IconCheck /> {/* Approve icon */}
+            </ActionIcon>
+          </Tooltip>
+        ) : (
+          // Delete icon for other statuses
+          <Tooltip label="Delete">
+            <ActionIcon
+              color="red"
+              onClick={() => {
+                setMessage({ type: "", text: "" }); // Reset message
+                rejectMutation.mutate(row.original.id);
+              }}
+            >
+              <IconTrash />
+            </ActionIcon>
+          </Tooltip>
+        )}
       </Flex>
     ),
     state: {

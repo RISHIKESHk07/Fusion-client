@@ -1,22 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm, isEmail } from "@mantine/form";
-import {
-  TextInput,
-  Textarea,
-  Button,
-  Group,
-  Container,
-  Alert,
-} from "@mantine/core";
+import { TextInput, Textarea, Button, Group, Container } from "@mantine/core";
 
 import "./GymkhanaForms.css";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
-import { Mutation, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
 const token = localStorage.getItem("authToken");
 function ClubRegistrationForm({ clubName }) {
+  // eslint-disable-next-line no-unused-vars
+  const [message, setMessage] = useState({ type: "", text: "" });
   // Set up the form with initial values and validation
   const user = useSelector((state) => state.user);
   const form = useForm({
@@ -42,7 +37,11 @@ function ClubRegistrationForm({ clubName }) {
     mutationFn: (newMemberData) => {
       return axios.post(
         "http://localhost:8000/gymkhana/api/club_membership/",
-        newMemberData,
+        {
+          member: newMemberData.rollNumber.toString(),
+          club: newMemberData.club,
+          description: `Experience: ${newMemberData.experience}\nAchievement: ${newMemberData.achievements}`,
+        },
         {
           headers: {
             Authorization: `Token ${token}`,
@@ -53,16 +52,20 @@ function ClubRegistrationForm({ clubName }) {
   });
   // Submit handler
   const handleSubmit = (values) => {
+    setMessage({ type: "", text: "" }); // Reset message
     mutation.mutate(values, {
       onSuccess: (response) => {
         // Handle success (you can redirect or show a success message)
         console.log("Successfully registered:", response.data);
-        Alert("Registration successful!");
+        setMessage({ type: "success", text: "Registration successful!" });
       },
       onError: (error) => {
         // Handle error (you can show an error message)
         console.error("Error during registration:", error);
-        Alert("Registration failed. Please try again.");
+        setMessage({
+          type: "error",
+          text: "Registration failed. Please try again.",
+        });
       },
     });
   };
