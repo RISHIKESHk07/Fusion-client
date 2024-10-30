@@ -8,8 +8,8 @@ import { useSelector } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
-const token = localStorage.getItem("authToken");
 function ClubRegistrationForm({ clubName }) {
+  const token = localStorage.getItem("authToken");
   // Set up the form with initial values and validation
   const user = useSelector((state) => state.user);
   const form = useForm({

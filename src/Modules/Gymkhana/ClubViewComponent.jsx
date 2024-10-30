@@ -1,4 +1,4 @@
-import { Box, Container, Group, Stack, Tabs, Text } from "@mantine/core";
+import { Box, Group, Stack, Tabs, Text } from "@mantine/core";
 import { useState, lazy, Suspense } from "react";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
@@ -7,6 +7,8 @@ import "@mantine/dates/styles.css";
 import "mantine-react-table/styles.css";
 import EventApprovalsWithProviders from "./ApprovalsTable";
 import CoordinatorMembersWithProviders from "./CoordinatorMembersTable";
+import BudgetApprovalsWithProviders from "./BudgetApprovalTable";
+import { useGetCurrentLoginnedRoleRelatedClub } from "./BackendLogic/ApiRoutes";
 
 const RegistrationForm = lazy(() => import("./RegistrationForm"));
 const CustomTable = lazy(() => import("./CustomTable"));
@@ -23,8 +25,11 @@ function ClubViewComponent({
   eventsColumns,
 }) {
   const user = useSelector((state) => state.user);
+  const token = localStorage.getItem("authToken");
   const userRole = user.role;
   const [activeclubfeature, setactiveclubfeature] = useState("About");
+  const { data: CurrentLogginedRelatedClub = [] } =
+    useGetCurrentLoginnedRoleRelatedClub(user.username, token);
 
   const renderActiveContent = () => {
     switch (activeclubfeature) {
@@ -69,7 +74,7 @@ function ClubViewComponent({
       case "BudgetApproval":
         return (
           <Suspense fallback={<div>Loading Table component</div>}>
-            <EventApprovalsWithProviders clubName={clubName} />
+            <BudgetApprovalsWithProviders clubName={clubName} />
           </Suspense>
         );
       case "Members_co-ordinator":
@@ -108,6 +113,7 @@ function ClubViewComponent({
         );
     }
   };
+  console.log(CurrentLogginedRelatedClub, clubName, user);
   return (
     <Box style={{ height: "100vh" }}>
       {" "}
@@ -136,33 +142,36 @@ function ClubViewComponent({
               {user.role !== "co-ordinator" && (
                 <Tabs.Tab value="Register">Register</Tabs.Tab>
               )}
+              {userRole === "Dean_s" && (
+                <>
+                  <Tabs.Tab value="EventsApproval">EventsApproval</Tabs.Tab>
+                  <Tabs.Tab value="BudgetApproval"> Budget Approval</Tabs.Tab>
+                </>
+              )}
               {(userRole === "FIC" ||
-                userRole === "Dean" ||
                 userRole === "Counsellor" ||
-                userRole === "Professor") && (
-                <>
-                  <Tabs.Tab value="EventsApproval">EventsApproval</Tabs.Tab>
-                  <Tabs.Tab value="BudgetApproval"> Budget Approval</Tabs.Tab>
-                  <Tabs.Tab value="EventsApprovalForm">
-                    Events approval Form
-                  </Tabs.Tab>
-                  <Tabs.Tab value="BudgetApprovalForm">
-                    Budget approval Form
-                  </Tabs.Tab>
-                </>
-              )}
-              {user.role === "co-ordinator" && (
-                <>
-                  <Tabs.Tab value="EventsApproval">EventsApproval</Tabs.Tab>
-                  <Tabs.Tab value="BudgetApproval"> Budget Approval</Tabs.Tab>
-                  <Tabs.Tab value="EventsApprovalForm">
-                    Events approval Form
-                  </Tabs.Tab>
-                  <Tabs.Tab value="BudgetApprovalForm">
-                    Budget approval Form
-                  </Tabs.Tab>
-                </>
-              )}
+                userRole === "Professor") &&
+                CurrentLogginedRelatedClub.length > 0 &&
+                CurrentLogginedRelatedClub[0].club === clubName && (
+                  <>
+                    <Tabs.Tab value="EventsApproval">EventsApproval</Tabs.Tab>
+                    <Tabs.Tab value="BudgetApproval"> Budget Approval</Tabs.Tab>
+                  </>
+                )}
+              {user.role === "co-ordinator" &&
+                CurrentLogginedRelatedClub.length > 0 &&
+                CurrentLogginedRelatedClub[0].club === clubName && (
+                  <>
+                    <Tabs.Tab value="EventsApproval">EventsApproval</Tabs.Tab>
+                    <Tabs.Tab value="BudgetApproval"> Budget Approval</Tabs.Tab>
+                    <Tabs.Tab value="EventsApprovalForm">
+                      Events approval Form
+                    </Tabs.Tab>
+                    <Tabs.Tab value="BudgetApprovalForm">
+                      Budget approval Form
+                    </Tabs.Tab>
+                  </>
+                )}
             </Tabs.List>
           </Tabs>
         </Group>

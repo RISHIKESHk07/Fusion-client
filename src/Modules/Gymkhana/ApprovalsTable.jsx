@@ -1,6 +1,6 @@
 import "@mantine/core/styles.css";
-import "@mantine/dates/styles.css"; // if using mantine date picker features
-import "mantine-react-table/styles.css"; // make sure MRT styles were imported in your app root (once)
+import "@mantine/dates/styles.css";
+import "mantine-react-table/styles.css";
 import React, { useMemo, useState } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
@@ -20,7 +20,7 @@ import {
   Pill,
   ScrollArea,
 } from "@mantine/core";
-import { IconEye } from "@tabler/icons-react";
+import { IconEye, IconEdit } from "@tabler/icons-react";
 import PropTypes from "prop-types";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
@@ -34,17 +34,21 @@ import {
   approveCounsellorEventButton,
   approveDeanEventButton,
 } from "./BackendLogic/ApiRoutes";
-import { IconBase } from "@phosphor-icons/react";
-
-const token = localStorage.getItem("authToken");
+import { EventsApprovalForm } from "./EventForm";
 
 function EventApprovals({ clubName }) {
   const user = useSelector((state) => state.user);
   const userRole = user.role;
+  const token = localStorage.getItem("authToken");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [validationErrors] = useState({});
   const [commentValue, setCommentValue] = useState("");
-  const { data: commentsData } = useGetCommentsEventInfo(selectedEvent?.id);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { data: commentsData } = useGetCommentsEventInfo(
+    selectedEvent?.id,
+    token,
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -68,7 +72,7 @@ function EventApprovals({ clubName }) {
     isError: isLoadingEventsError,
     isFetching: isFetchingEvents,
     isLoading: isLoadingEvents,
-  } = useGetUpcomingEvents(clubName);
+  } = useGetUpcomingEvents(token);
 
   const openViewModal = (event) => {
     setSelectedEvent(event);
@@ -76,6 +80,126 @@ function EventApprovals({ clubName }) {
 
   const closeViewModal = () => {
     setSelectedEvent(null);
+  };
+
+  const openEditModal = (event) => {
+    setSelectedEvent(event);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedEvent(null);
+  };
+
+  const updateEventMutation = useMutation({
+    mutationFn: (updatedEventData) => {
+      return axios.put(
+        "http://127.0.0.1:8000/gymkhana/api/update_event/",
+        updatedEventData,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
+    },
+    onSuccess: () => {
+      closeEditModal();
+      // You might want to refresh your events data here
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: (commentData) => {
+      return axios.post(
+        "http://localhost:8000/gymkhana/api/create_event_comment/",
+        {
+          event_id: commentData.selectedEvent.id,
+          commentator_designation: commentData.userRole,
+          comment: commentData.commentValue,
+        },
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
+    },
+  });
+
+  const handleCommentSubmit = (values) => {
+    mutation.mutate(values, {
+      onSuccess: (response) => {
+        console.log("Successfully comment posted!!!", response.data);
+        alert("Successfully comment posted!!!");
+      },
+      onError: (error) => {
+        console.error("Error during posting comment", error);
+        alert("Error during posting comment");
+      },
+    });
+  };
+
+  const approveFICMutation = useMutation({
+    mutationFn: (eventId) => {
+      approveFICEventButton(eventId, token);
+    },
+    onSuccess: () => {
+      alert("Approved by FIC");
+      closeViewModal();
+    },
+  });
+
+  const approveCounsellorMutation = useMutation({
+    mutationFn: (eventId) => approveCounsellorEventButton(eventId, token),
+    onSuccess: () => {
+      alert("Approved by Counsellor");
+      closeViewModal();
+    },
+  });
+
+  const approveDeanMutation = useMutation({
+    mutationFn: (eventId) => approveDeanEventButton(eventId, token),
+    onSuccess: () => {
+      alert("Approved by Dean Student");
+      closeViewModal();
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (eventId) => rejectEventButton(eventId, token),
+    onSuccess: () => {
+      alert("Rejected the event");
+      closeViewModal();
+    },
+  });
+
+  const modifyMutation = useMutation({
+    mutationFn: (eventId) => modifyEventButton(eventId, token),
+    onSuccess: () => {
+      closeViewModal();
+    },
+  });
+
+  const handleFICApproveButton = (eventId) => {
+    approveFICMutation.mutate(eventId);
+  };
+
+  const handleCounsellorApproveButton = (eventId) => {
+    approveCounsellorMutation.mutate(eventId);
+  };
+
+  const handleDeanApproveButton = (eventId) => {
+    approveDeanMutation.mutate(eventId);
+  };
+
+  const handleRejectButton = (eventId) => {
+    rejectMutation.mutate(eventId);
+  };
+
+  const handleModifyButton = (eventId) => {
+    modifyMutation.mutate(eventId);
   };
 
   const table = useMantineReactTable({
@@ -109,18 +233,17 @@ function EventApprovals({ clubName }) {
           {row.original.status}
         </Pill>
 
-        {row.original.status === "COORDINATOR" && (
-          <Tooltip label="Edit">
-            <ActionIcon
-              color="blue"
-              onClick={() => {
-                // TODO: Implement Looooogic for this
-              }}
-            >
-              <IconBase />
-            </ActionIcon>
-          </Tooltip>
-        )}
+        {row.original.status === "COORDINATOR" &&
+          userRole === "co-ordinator" && (
+            <Tooltip label="Edit">
+              <ActionIcon
+                color="blue"
+                onClick={() => openEditModal(row.original)}
+              >
+                <IconEdit />
+              </ActionIcon>
+            </Tooltip>
+          )}
       </Flex>
     ),
     state: {
@@ -129,111 +252,22 @@ function EventApprovals({ clubName }) {
       showProgressBars: isFetchingEvents,
     },
   });
-  const mutation = useMutation({
-    mutationFn: (commentData) => {
-      console.log(commentData);
-      return axios.post(
-        "http://localhost:8000/gymkhana/api/create_event_comment/",
-        {
-          event_id: commentData.selectedEvent.id,
-          commentator_designation: commentData.userRole,
-          comment: commentData.commentValue,
-        },
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        },
-      );
-    },
-  });
-  const handleCommentSubmit = (values) => {
-    mutation.mutate(values, {
-      onSuccess: (response) => {
-        // Handle success (you can redirect or show a success message)
-        console.log("Successfully comment posted!!!", response.data);
-        alert("Successfully comment posted!!!");
-      },
-      onError: (error) => {
-        // Handle error (you can show an error message)
-        console.error("Error during posting comment", error);
-        alert("Error during posting comment");
-      },
-    });
-  };
-  const approveFICMutation = useMutation({
-    mutationFn: (eventId) => {
-      approveFICEventButton(eventId);
-    },
-    onSuccess: () => {
-      // Handle what happens after approval, e.g., close the form
-      alert("Approved by FIC");
-      closeViewModal();
-    },
-  });
-  const approveCounsellorMutation = useMutation({
-    mutationFn: (eventId) => approveCounsellorEventButton(eventId),
-    onSuccess: () => {
-      // Handle what happens after approval, e.g., close the form
-      alert("Approved by Counsellor");
-      closeViewModal();
-    },
-  });
-  const approveDeanMutation = useMutation({
-    mutationFn: (eventId) => approveDeanEventButton(eventId),
-    onSuccess: () => {
-      // Handle what happens after approval, e.g., close the form
-      alert("Approved by Dean Student");
-      closeViewModal();
-    },
-  });
-
-  // Mutation for reject
-  const rejectMutation = useMutation({
-    mutationFn: (eventId) => rejectEventButton(eventId),
-    onSuccess: () => {
-      // Handle what happens after rejection
-      alert("Rejected the event");
-      closeViewModal();
-    },
-  });
-
-  // Mutation for modify
-  const modifyMutation = useMutation({
-    mutationFn: (eventId) => modifyEventButton(eventId),
-    onSuccess: () => {
-      // Handle what happens after modification
-      closeViewModal();
-    },
-  });
-
-  const handleFICApproveButton = (eventId) => {
-    approveFICMutation.mutate(eventId);
-  };
-  const handleCounsellorApproveButton = (eventId) => {
-    approveCounsellorMutation.mutate(eventId);
-  };
-  const handleDeanApproveButton = (eventId) => {
-    approveDeanMutation.mutate(eventId);
-  };
-
-  const handleRejectButton = (eventId) => {
-    rejectMutation.mutate(eventId);
-  };
-  const handleModifyButton = (eventId) => {
-    modifyMutation.mutate(eventId);
-  };
 
   return (
     <>
       <MantineReactTable table={table} />
-      <Modal opened={!!selectedEvent} onClose={closeViewModal} w="40%">
-        {/* View Content  */}
+
+      {/* View Modal */}
+      <Modal
+        opened={!!selectedEvent && !isEditModalOpen}
+        onClose={closeViewModal}
+        w="40%"
+      >
         {selectedEvent && (
           <Stack
             spacing="md"
             sx={{
-              width: "40%", // Modal spans 40% of the screen
+              width: "100%",
               padding: "20px",
               border: "1px solid #dfe1e5",
               borderRadius: "8px",
@@ -281,7 +315,7 @@ function EventApprovals({ clubName }) {
                   <ScrollArea h={250}>
                     {commentsData?.map((comment) => (
                       <Box
-                        key={comment.event_index}
+                        key={comment.comment}
                         my="sm"
                         style={{
                           border: "solid 2px black",
@@ -339,7 +373,7 @@ function EventApprovals({ clubName }) {
               </Box>
 
               {(userRole === "FIC" ||
-                userRole === "Dean" ||
+                userRole === "Dean_s" ||
                 userRole === "Counsellor" ||
                 userRole === "Professor") && (
                 <Box mt="md">
@@ -354,7 +388,7 @@ function EventApprovals({ clubName }) {
                         FIC Approve
                       </Button>
                     )}
-                    {userRole === "Dean" && (
+                    {userRole === "Dean_s" && (
                       <Button
                         color="blue"
                         onClick={() => {
@@ -374,76 +408,90 @@ function EventApprovals({ clubName }) {
                         Counsellor Approve
                       </Button>
                     )}
-                    <Button color="red" onClick={handleRejectButton}>
+                    <Button
+                      color="red"
+                      onClick={() => {
+                        handleRejectButton(selectedEvent.id);
+                      }}
+                    >
                       Reject
                     </Button>
-                    <Button color="yellow" onClick={handleModifyButton}>
+                    <Button
+                      color="yellow"
+                      onClick={() => {
+                        handleModifyButton(selectedEvent.id);
+                      }}
+                    >
                       Modify
                     </Button>
                   </Group>
                 </Box>
               )}
             </Box>
-
-            {(userRole === "FIC" ||
-              userRole === "Dean" ||
-              userRole === "Counsellor" ||
-              userRole === "Professor") && (
-              <Box mt="md">
-                <Group jsutify="center">
-                  {(userRole === "FIC" || userRole === "Professor") && (
-                    <Button
-                      color="blue"
-                      onClick={() => {
-                        handleFICApproveButton(selectedEvent.id);
-                      }}
-                    >
-                      FIC Approve
-                    </Button>
-                  )}
-                  {userRole === "Dean" && (
-                    <Button
-                      color="blue"
-                      onClick={() => {
-                        handleDeanApproveButton(selectedEvent.id);
-                      }}
-                    >
-                      Dean Approve
-                    </Button>
-                  )}
-                  {userRole === "Counsellor" && (
-                    <Button
-                      color="blue"
-                      onClick={() => {
-                        handleCounsellorApproveButton(selectedEvent.id);
-                      }}
-                    >
-                      Counsellor Approve
-                    </Button>
-                  )}
-                  <Button color="red" onClick={handleRejectButton}>
-                    Reject
-                  </Button>
-                  <Button color="yellow" onClick={handleModifyButton}>
-                    Modify
-                  </Button>
-                </Group>
-              </Box>
-            )}
           </Stack>
+        )}
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        opened={isEditModalOpen}
+        onClose={closeEditModal}
+        title="Edit Event"
+        size="lg"
+      >
+        {selectedEvent && (
+          <EventsApprovalForm
+            clubName={clubName}
+            initialValues={{
+              ...selectedEvent,
+              start_date: new Date(selectedEvent.start_date),
+              end_date: new Date(selectedEvent.end_date),
+              start_time: selectedEvent.start_time,
+              end_time: selectedEvent.end_time,
+            }}
+            onSubmit={(values) => {
+              const formData = new FormData();
+
+              // Add the text data (details)
+              formData.append("details", values.details);
+
+              // Add the file (poster), check if a new file is selected
+              if (values.poster) {
+                formData.append("event_poster", values.poster);
+              }
+
+              // Add the ID of the event
+              formData.append("id", selectedEvent.id);
+
+              // Now, submit the formData to the backend using the mutation
+              updateEventMutation.mutate(formData);
+            }}
+            editMode
+            disabledFields={[
+              "event_name",
+              "venue",
+              "incharge",
+              "start_date",
+              "end_date",
+              "start_time",
+              "end_time",
+            ]}
+          />
         )}
       </Modal>
     </>
   );
 }
 
+EventApprovals.propTypes = {
+  clubName: PropTypes.string,
+};
+
 function EventApprovalsWithProviders({ clubName }) {
   return <EventApprovals clubName={clubName} />;
 }
+
 EventApprovalsWithProviders.propTypes = {
-  clubName: PropTypes.string,
-};
-EventApprovals.propTypes = {
   clubName: PropTypes.string,
 };
 

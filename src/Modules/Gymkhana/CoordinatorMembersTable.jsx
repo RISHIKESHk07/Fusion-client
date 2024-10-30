@@ -10,10 +10,8 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useGetClubMembers } from "./BackendLogic/ApiRoutes";
 
-const token = localStorage.getItem("authToken");
-
 function CoordinatorMembers({ clubName }) {
-  const [setMessage] = useState({ type: "", text: "" });
+  const token = localStorage.getItem("authToken");
   const [validationErrors] = useState({});
   const approvemutation = useMutation({
     mutationFn: (clubMemberId) => {
@@ -100,7 +98,7 @@ function CoordinatorMembers({ clubName }) {
     isError: isLoadingEventsError,
     isFetching: isFetchingEvents,
     isLoading: isLoadingEvents,
-  } = useGetClubMembers(clubName);
+  } = useGetClubMembers(clubName, token);
   console.log(fetchedEvents, clubName);
   const table = useMantineReactTable({
     columns,

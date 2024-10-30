@@ -172,6 +172,7 @@ function SidebarContent({ isCollapsed, toggleSidebar }) {
     const filterModules = Modules.filter(
       (module) => accessibleModules[module.id] || module.id === "home",
     );
+
     setFilteredModules(filterModules);
   }, [accessibleModules]);
 

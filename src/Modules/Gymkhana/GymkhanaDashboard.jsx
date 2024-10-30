@@ -29,18 +29,24 @@ const ClubViewComponent = lazy(() => import("./ClubViewComponent"));
 
 function GymkhanaDashboard() {
   const user = useSelector((state) => state.user);
+  const token = localStorage.getItem("authToken");
   const [activeTab, setActiveTab] = useState("Clubs");
   const [value, setValue] = useState("Select a Club");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedClub, setSelectedClub] = useState("All Clubs");
   const { data: upcomingEvents, isLoading: loadingUpcomingEvents } =
-    useGetUpcomingEvents();
-  const { data: pastEvents } = useGetPastEvents();
-  const { data: clubMembers, refetch: refetchClubMembers } =
-    useGetClubMembers(value);
-  const { data: clubDetail, refetch: refetchClubDetail } = useGetData(value);
+    useGetUpcomingEvents(token);
+  const { data: pastEvents } = useGetPastEvents(token);
+  const { data: clubMembers, refetch: refetchClubMembers } = useGetClubMembers(
+    value,
+    token,
+  );
+  const { data: clubDetail, refetch: refetchClubDetail } = useGetData(
+    value,
+    token,
+  );
   const { data: Acheivements, refetch: refetchAcheivements } =
-    useGetClubAcheivement(value);
+    useGetClubAcheivement(value, token);
   // Use useEffect to refetch data when `value` (selected club) changes
   useEffect(() => {
     if (value && value !== "Select a Club") {
@@ -137,7 +143,7 @@ function GymkhanaDashboard() {
               <Suspense fallback={<div>Loading .......</div>}>
                 {upcomingEvents && Acheivements && clubMembers && (
                   <ClubViewComponent
-                    // AboutClub={clubDetail.description} //TODO: not giving the .descriptioin check backend once
+                    // AboutClub={clubDetail.details}
                     clubName={value}
                     membersData={clubMembers}
                     achievementsData={Acheivements}

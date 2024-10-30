@@ -16,10 +16,12 @@ import {
   Select,
   Paper,
 } from "@mantine/core";
+import { useQueryClient } from "@tanstack/react-query";
 import PropTypes from "prop-types";
 import { setRole, setCurrentAccessibleModules } from "../redux/userslice";
 import classes from "../Modules/Dashboard/Dashboard.module.css";
 import avatarImage from "../assets/avatar.png";
+
 import { logoutRoute, updateRoleRoute } from "../routes/dashboardRoutes";
 
 function Header({ opened, toggleSidebar }) {
@@ -29,6 +31,7 @@ function Header({ opened, toggleSidebar }) {
   const role = useSelector((state) => state.user.role);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const queryclient = useQueryClient();
 
   const handleRoleChange = async (newRole) => {
     const token = localStorage.getItem("authToken");
@@ -68,6 +71,7 @@ function Header({ opened, toggleSidebar }) {
       );
       localStorage.removeItem("authToken");
       navigate("/accounts/login");
+      queryclient.invalidateQueries();
       console.log("User logged out successfully");
     } catch (err) {
       console.error("Logout error:", err);

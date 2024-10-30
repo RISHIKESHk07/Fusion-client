@@ -12,30 +12,32 @@ import PropTypes from "prop-types";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import "./GymkhanaForms.css";
+import { DateInput, TimeInput } from "@mantine/dates";
 
-const token = localStorage.getItem("authToken");
-
-function EventsApprovalForm({ clubName }) {
-  console.log(clubName);
-
-  // State for success, error messages, and modal visibility
+function EventsApprovalForm({
+  clubName,
+  initialValues,
+  onSubmit,
+  editMode = false,
+  disabledFields = [],
+}) {
+  const token = localStorage.getItem("authToken");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Set up the form with initial values and validation
   const form = useForm({
-    initialValues: {
+    initialValues: initialValues || {
       event_name: "",
       venue: "",
       incharge: "",
-      end_date: "",
+      end_date: null,
       start_time: "",
       end_time: "",
       event_poster: "",
       details: "",
       club: clubName,
-      start_date: "",
+      start_date: null,
       status: "",
     },
     validate: {
@@ -44,8 +46,7 @@ function EventsApprovalForm({ clubName }) {
       venue: (value) => (value.length === 0 ? "Venue cannot be empty" : null),
       incharge: (value) =>
         value.length === 0 ? "Incharge cannot be empty" : null,
-      end_date: (value) =>
-        value.length === 0 ? "End date cannot be empty" : null,
+      end_date: (value) => (!value ? "End date cannot be empty" : null),
       start_time: (value) =>
         value.length === 0 ? "Start time cannot be empty" : null,
       end_time: (value) =>
@@ -54,12 +55,10 @@ function EventsApprovalForm({ clubName }) {
         value.length === 0 ? "Event poster cannot be empty" : null,
       details: (value) =>
         value.length === 0 ? "Details cannot be empty" : null,
-      start_date: (value) =>
-        value.length === 0 ? "Start date cannot be empty" : null,
+      start_date: (value) => (!value ? "Start date cannot be empty" : null),
     },
   });
 
-  // Mutation setup for submitting the form data via API
   const mutation = useMutation({
     mutationFn: (newEventData) => {
       return axios.put(
@@ -69,14 +68,14 @@ function EventsApprovalForm({ clubName }) {
           headers: {
             Authorization: `Token ${token}`,
           },
-        }, // Replace with your actual API endpoint
+        },
       );
     },
     onSuccess: (response) => {
       console.log("Successfully registered:", response.data);
       setSuccessMessage("Event registered successfully!");
-      setIsModalOpen(true); // Show the modal
-      form.reset(); // Clear the form data after submission
+      setIsModalOpen(true);
+      form.reset();
     },
     onError: (error) => {
       console.error("Error during registration:", error);
@@ -84,30 +83,39 @@ function EventsApprovalForm({ clubName }) {
     },
   });
 
-  // Submit handler
   const handleSubmit = (values) => {
-    // Perform form submission
-    mutation.mutate(values);
+    if (editMode && onSubmit) {
+      onSubmit(values);
+      return;
+    }
+
+    const formattedValues = {
+      ...values,
+      start_date: values.start_date
+        ? values.start_date.toISOString().slice(0, 10)
+        : null,
+      end_date: values.end_date
+        ? values.end_date.toISOString().slice(0, 10)
+        : null,
+    };
+    mutation.mutate(formattedValues);
   };
 
   return (
     <Container>
       <form onSubmit={form.onSubmit(handleSubmit)} className="club-form">
-        {/* Success Message */}
         {successMessage && (
           <Alert title="Success" color="green" mt="md">
             {successMessage}
           </Alert>
         )}
 
-        {/* Error Message */}
         {errorMessage && (
           <Alert title="Error" color="red" mt="md">
             {errorMessage}
           </Alert>
         )}
 
-        {/* Event Name */}
         <TextInput
           label="Event Name"
           placeholder="Enter event name"
@@ -116,10 +124,10 @@ function EventsApprovalForm({ clubName }) {
             form.setFieldValue("event_name", event.currentTarget.value)
           }
           error={form.errors.event_name}
+          disabled={editMode && disabledFields.includes("event_name")}
           withAsterisk
         />
 
-        {/* Details */}
         <TextInput
           label="Details"
           placeholder="Enter the event details"
@@ -128,10 +136,10 @@ function EventsApprovalForm({ clubName }) {
             form.setFieldValue("details", event.currentTarget.value)
           }
           error={form.errors.details}
+          disabled={editMode && disabledFields.includes("details")}
           withAsterisk
         />
 
-        {/* Venue */}
         <TextInput
           label="Venue"
           placeholder="Enter the venue"
@@ -140,10 +148,10 @@ function EventsApprovalForm({ clubName }) {
             form.setFieldValue("venue", event.currentTarget.value)
           }
           error={form.errors.venue}
+          disabled={editMode && disabledFields.includes("venue")}
           withAsterisk
         />
 
-        {/* Incharge */}
         <TextInput
           label="Incharge"
           placeholder="Incharge"
@@ -152,35 +160,33 @@ function EventsApprovalForm({ clubName }) {
             form.setFieldValue("incharge", event.currentTarget.value)
           }
           error={form.errors.incharge}
+          disabled={editMode && disabledFields.includes("incharge")}
           withAsterisk
         />
 
-        {/* Start Date */}
-        <TextInput
+        <DateInput
           label="Start Date"
+          valueFormat="YYYY-MM-DD"
           placeholder="Enter the start date (e.g., YYYY-MM-DD)"
           value={form.values.start_date}
-          onChange={(event) =>
-            form.setFieldValue("start_date", event.currentTarget.value)
-          }
+          onChange={(event) => form.setFieldValue("start_date", event)}
           error={form.errors.start_date}
+          disabled={editMode && disabledFields.includes("start_date")}
           withAsterisk
         />
 
-        {/* End Date */}
-        <TextInput
+        <DateInput
           label="End Date"
+          valueFormat="YYYY-MM-DD"
           placeholder="Enter the end date (e.g., YYYY-MM-DD)"
           value={form.values.end_date}
-          onChange={(event) =>
-            form.setFieldValue("end_date", event.currentTarget.value)
-          }
+          onChange={(event) => form.setFieldValue("end_date", event)}
           error={form.errors.end_date}
+          disabled={editMode && disabledFields.includes("end_date")}
           withAsterisk
         />
 
-        {/* Start Time */}
-        <TextInput
+        <TimeInput
           label="Start Time"
           placeholder="Enter start time of the event"
           value={form.values.start_time}
@@ -188,11 +194,11 @@ function EventsApprovalForm({ clubName }) {
             form.setFieldValue("start_time", event.currentTarget.value)
           }
           error={form.errors.start_time}
+          disabled={editMode && disabledFields.includes("start_time")}
           withAsterisk
         />
 
-        {/* End Time */}
-        <TextInput
+        <TimeInput
           label="End Time"
           placeholder="Enter end time of the event"
           value={form.values.end_time}
@@ -200,10 +206,10 @@ function EventsApprovalForm({ clubName }) {
             form.setFieldValue("end_time", event.currentTarget.value)
           }
           error={form.errors.end_time}
+          disabled={editMode && disabledFields.includes("end_time")}
           withAsterisk
         />
 
-        {/* Event Poster */}
         <TextInput
           label="Event Poster"
           placeholder="Event Poster"
@@ -212,33 +218,38 @@ function EventsApprovalForm({ clubName }) {
             form.setFieldValue("event_poster", event.currentTarget.value)
           }
           error={form.errors.event_poster}
+          disabled={editMode && disabledFields.includes("event_poster")}
           withAsterisk
         />
 
-        {/* Submit Button */}
         <Group position="center" mt="md">
-          {token && (
-            <Button type="submit" className="submit-btn">
-              Submit
-            </Button>
-          )}
+          <Button type="submit" className="submit-btn">
+            {editMode ? "Update" : "Submit"}
+          </Button>
         </Group>
       </form>
 
-      {/* Modal for successful submission */}
       <Modal
         opened={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="Success!"
       >
-        <p>Your event has been successfully submitted!</p>
+        <p>
+          Your event has been successfully {editMode ? "updated" : "submitted"}!
+        </p>
         <Button onClick={() => setIsModalOpen(false)}>Close</Button>
       </Modal>
     </Container>
   );
 }
 
-export { EventsApprovalForm };
+EventsApprovalForm.propTypes = {
+  clubName: PropTypes.string.isRequired,
+  initialValues: PropTypes,
+  onSubmit: PropTypes.func,
+  editMode: PropTypes.bool,
+  disabledFields: PropTypes.arrayOf(PropTypes.string),
+};
 
 function EventForm({ clubName }) {
   return (
@@ -253,4 +264,5 @@ EventForm.propTypes = {
   clubName: PropTypes.string.isRequired,
 };
 
+export { EventsApprovalForm };
 export default EventForm;
