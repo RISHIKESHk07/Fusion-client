@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-
 // club details from here can be inferred from here
 export const useGetData = (clubName, token) => {
   return useQuery({
@@ -102,7 +101,6 @@ export const useGetClubMembers = (clubName, token) => {
   });
 };
 
-
 export const useGetClubAcheivement = (clubName, token) => {
   return useQuery({
     queryKey: ["clubAcheivements"],
@@ -156,7 +154,6 @@ export const useGetCommentsEventInfo = (EventId, token) => {
 // TODO handle Approve Button for Event form
 
 export const approveFICEventButton = async (eventId, token) => {
-
   const response = axios.put(
     "http://localhost:8000/gymkhana/api/fic_approve_event/",
     { id: eventId },
@@ -180,7 +177,6 @@ export const approveCounsellorEventButton = async (eventId, token) => {
     },
   );
 };
-
 
 export const approveDeanEventButton = async (eventId, token) => {
   return axios.put(
@@ -358,4 +354,3 @@ export const useGetCurrentLoginnedRoleRelatedClub = (InputName, token) => {
     },
   });
 };
-

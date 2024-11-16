@@ -92,16 +92,17 @@ function BudgetApprovalForm({ clubName }) {
   return (
     <Container>
       <form onSubmit={form.onSubmit(handleSubmit)} className="club-form">
+        <h2 className="club-header">{clubName}'s Budget Proposal</h2>
         {/* Success Message */}
         {successMessage && (
-          <Alert title="Success" color="green" mt="md">
+          <Alert title="Success" color="green" mt="md" className="club-message">
             {successMessage}
           </Alert>
         )}
 
         {/* Error Message */}
         {errorMessage && (
-          <Alert title="Error" color="red" mt="md">
+          <Alert title="Error" color="red" mt="md" className="club-message">
             {errorMessage}
           </Alert>
         )}
@@ -179,7 +180,7 @@ function BudgetApprovalForm({ clubName }) {
         />
 
         {/* Submit Button */}
-        <Group position="center" mt="md">
+        <Group position="center" mt="md" className="submit-container">
           {token && (
             <Button type="submit" className="submit-btn">
               Submit
@@ -191,12 +192,15 @@ function BudgetApprovalForm({ clubName }) {
   );
 }
 
+BudgetApprovalForm.propTypes = {
+  clubName: PropTypes.string.isRequired,
+};
+
 export { BudgetApprovalForm };
 
 function BudgetForm({ clubName }) {
   return (
     <Container>
-      <h2 className="club-header">Submit {clubName}'s Budget Proposal</h2>
       <BudgetApprovalForm clubName={clubName} />
     </Container>
   );
