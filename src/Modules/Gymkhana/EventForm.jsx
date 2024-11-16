@@ -105,13 +105,13 @@ function EventsApprovalForm({
       <form onSubmit={form.onSubmit(handleSubmit)} className="club-form">
         <h2 className="club-header">Apply for {clubName}'s Event !!!</h2>
         {successMessage && (
-          <Alert title="Success" color="green" mt="md">
+          <Alert title="Success" color="green" mt="md" className="club-message">
             {successMessage}
           </Alert>
         )}
 
         {errorMessage && (
-          <Alert title="Error" color="red" mt="md">
+          <Alert title="Error" color="red" mt="md" className="club-message">
             {errorMessage}
           </Alert>
         )}
