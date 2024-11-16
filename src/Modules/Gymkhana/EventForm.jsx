@@ -103,12 +103,12 @@ function EventsApprovalForm({
   return (
     <Container>
       <form onSubmit={form.onSubmit(handleSubmit)} className="club-form">
+        <h2 className="club-header">Apply for {clubName}'s Event !!!</h2>
         {successMessage && (
           <Alert title="Success" color="green" mt="md">
             {successMessage}
           </Alert>
         )}
-
 
         {errorMessage && (
           <Alert title="Error" color="red" mt="md">
@@ -203,7 +203,6 @@ function EventsApprovalForm({
             form.setFieldValue("end_time", event.currentTarget.value)
           }
           error={form.errors.end_time}
-
           disabled={editMode && disabledFields.includes("end_time")}
           withAsterisk
         />
@@ -219,7 +218,7 @@ function EventsApprovalForm({
           withAsterisk
         />
 
-        <Group position="center" mt="md">
+        <Group position="center" mt="md" className="submit-container">
           <Button type="submit" className="submit-btn">
             {editMode ? "Update" : "Submit"}
           </Button>
@@ -230,7 +229,6 @@ function EventsApprovalForm({
         onClose={() => setIsModalOpen(false)}
         title="Success!"
       >
-
         <p>
           Your event has been successfully {editMode ? "updated" : "submitted"}!
         </p>
@@ -239,7 +237,6 @@ function EventsApprovalForm({
     </Container>
   );
 }
-
 
 EventsApprovalForm.propTypes = {
   clubName: PropTypes.string.isRequired,
@@ -252,7 +249,6 @@ EventsApprovalForm.propTypes = {
 function EventForm({ clubName }) {
   return (
     <Container>
-      <h2 className="club-header">Apply for {clubName}'s Event !!!</h2>
       <EventsApprovalForm clubName={clubName} />
     </Container>
   );
@@ -261,7 +257,6 @@ function EventForm({ clubName }) {
 EventForm.propTypes = {
   clubName: PropTypes.string.isRequired,
 };
-
 
 export { EventsApprovalForm };
 export default EventForm;
