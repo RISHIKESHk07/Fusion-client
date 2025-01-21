@@ -9,6 +9,7 @@ import "mantine-react-table/styles.css";
 import EventApprovalsWithProviders from "./ApprovalsTable";
 import CoordinatorMembersWithProviders from "./CoordinatorMembersTable";
 import BudgetApprovalsWithProviders from "./BudgetApprovalTable";
+import FestForm from "./FestForm";
 import { useGetCurrentLoginnedRoleRelatedClub } from "./BackendLogic/ApiRoutes";
 
 const RegistrationForm = lazy(() => import("./RegistrationForm"));
@@ -80,6 +81,7 @@ function ClubViewComponent({
       { title: "Budget Approval" },
       { title: "Events Approval Form" },
       { title: "Budget Approval Form" },
+      { title: "Fest Form" },
     );
   }
 
@@ -132,6 +134,12 @@ function ClubViewComponent({
         return (
           <Suspense fallback={<div>Loading Table component</div>}>
             <BudgetApprovalsWithProviders clubName={clubName} />
+          </Suspense>
+        );
+      case "Fest Form":
+        return (
+          <Suspense fallback={<div>Loading Table component</div>}>
+            <FestForm clubName={clubName} />
           </Suspense>
         );
       case `${clubName} Members`:

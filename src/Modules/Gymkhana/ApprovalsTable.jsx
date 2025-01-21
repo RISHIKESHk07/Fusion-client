@@ -104,7 +104,7 @@ function EventApprovals({ clubName }) {
       }
       if (event.status.toLowerCase() === "dean") {
         if (
-          userRole.toLowerCase() === "dean" ||
+          userRole.toLowerCase() === "dean_s" ||
           userRole.toLowerCase() === "counsellor" ||
           userRole.toLowerCase() === "professor" ||
           userRole.toLowerCase() === "assistant professor" ||
@@ -306,7 +306,7 @@ function EventApprovals({ clubName }) {
         </>
       );
     }
-    if (selectedEvent.status === "DEAN" && userRole === "Dean") {
+    if (selectedEvent.status === "DEAN" && userRole === "Dean_s") {
       return (
         <>
           <Button

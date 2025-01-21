@@ -10,13 +10,14 @@ import DateSelector from "./calender/DateSelector";
 import EventCalendar from "./calender/EventCalender";
 import EventCard from "./calender/EventCard";
 // import CustomTable from "./CustomTable";
-import { festColumns, festData } from "./makeData";
+// import { festColumns, festData } from "./makeData";
 import {
   useGetClubMembers,
   useGetData,
   useGetPastEvents,
   useGetUpcomingEvents,
   useGetClubAcheivement,
+  useGetFests,
 } from "./BackendLogic/ApiRoutes";
 
 const ClubViewComponent = lazy(() => import("./ClubViewComponent"));
@@ -40,6 +41,7 @@ function GymkhanaDashboard() {
 
   const { data: upcomingEvents } = useGetUpcomingEvents(token);
   const { data: pastEvents } = useGetPastEvents(token);
+  const { data: fests } = useGetFests(token);
   const { data: clubMembers, refetch: refetchClubMembers } = useGetClubMembers(
     value,
     token,
@@ -146,11 +148,6 @@ function GymkhanaDashboard() {
                   clubName={value}
                   membersData={clubMembers}
                   achievementsData={Acheivements}
-                  eventsData={upcomingEvents.filter((item) => {
-                    if (item.club === value && item.status === "ACCEPT")
-                      return true;
-                    return false;
-                  })}
                   eventsData={[...upcomingEvents, ...pastEvents]
                     .filter((item) => {
                       if (item.club === value && item.status === "ACCEPT")
@@ -303,8 +300,15 @@ function GymkhanaDashboard() {
         <Box mt="10px" mx="0" my="xs">
           <Suspense fallback={<div>Loading Fests Table...</div>}>
             <CustomTable
-              data={festData}
-              columns={festColumns}
+              data={fests}
+              columns={[
+                { accessorKey: "id", header: "ID" },
+                { accessorKey: "name", header: "Name" },
+                { accessorKey: "category", header: "Category" },
+                { accessorKey: "description", header: "Description" },
+                { accessorKey: "date", header: "Date" },
+                { accessorKey: "link", header: "Link" },
+              ]}
               TableName="Fests"
             />
           </Suspense>
@@ -347,7 +351,6 @@ function GymkhanaDashboard() {
                   TableName="Upcoming Events"
                 />
               )}
-
             </Suspense>
           </Box>
           <Box>
@@ -386,8 +389,6 @@ function GymkhanaDashboard() {
               )}
             </Suspense>
           </Box>
-
-         
         </Box>
       )}
     </>
