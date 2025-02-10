@@ -57,14 +57,14 @@ function BudgetApprovalForm({
   const mutation = useMutation({
     mutationFn: (newBudgetData) => {
       // Create a FormData object for file upload
-      const formData = new FormData();
-      formData.append("budget_for", newBudgetData.budget_for);
-      formData.append("description", newBudgetData.description);
-      formData.append("budget_amt", newBudgetData.budget_amt);
-      formData.append("status", newBudgetData.status);
-      formData.append("remarks", newBudgetData.remarks);
-      formData.append("club", newBudgetData.club);
-      formData.append("budget_file", newBudgetData.budget_file); // Attach the file
+      // const formData = new FormData();
+      // formData.append("budget_for", newBudgetData.budget_for);
+      // formData.append("description", newBudgetData.description);
+      // formData.append("budget_amt", newBudgetData.budget_amt);
+      // formData.append("status", newBudgetData.status);
+      // formData.append("remarks", newBudgetData.remarks);
+      // formData.append("club", newBudgetData.club);
+      // formData.append("budget_file", newBudgetData.budget_file); // Attach the file
 
       return axios.put(
         "http://127.0.0.1:8000/gymkhana/api/new_budget/", // API URL for the budget submission
