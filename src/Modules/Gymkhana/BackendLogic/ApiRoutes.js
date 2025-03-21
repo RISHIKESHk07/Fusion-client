@@ -376,3 +376,27 @@ export const useGetFests = (token) => {
     },
   });
 };
+
+export const useGetNewsLetterEvent = (roll_no, token) => {
+  return useQuery({
+    queryKey: ["PastEventsData"],
+    queryFn: async () => {
+      try {
+        const { data } = await axios.post(
+          "http://localhost:8000/gymkhana/api/coordinator_events/",
+          { roll_number: roll_no },
+          {
+            headers: {
+              Authorization: `Token ${token}`,
+            },
+          },
+        );
+        // console.log("fetched data",data);
+        return data;
+      } catch (error) {
+        console.error("Error:", error.response?.data || error.message);
+        throw new Error("Failed to fetch data");
+      }
+    },
+  });
+};
