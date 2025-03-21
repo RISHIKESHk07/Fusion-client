@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useForm } from "@mantine/form";
 import {
   TextInput,
@@ -14,7 +14,10 @@ import PropTypes from "prop-types";
 import { useMutation } from "@tanstack/react-query";
 import "./GymkhanaForms.css";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { notifications } from "@mantine/notifications";
 import { useGetNewsLetterEvent } from "./BackendLogic/ApiRoutes";
+import { authRoute } from "../../routes/globalRoutes";
 
 function NewsForm({
   initialValues,
@@ -27,21 +30,62 @@ function NewsForm({
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem("authToken");
-  const [fetchedEvents, setFetchedEvents] = useState([]);
-  const roll_no = "21BCS158";
+  const [fetchedEvents, setFetchedEvents] = useState(() => {
+    const storedEvents = localStorage.getItem("fetchedEvents");
+    return storedEvents ? JSON.parse(storedEvents) : null;
+  });
+  // const roll_no = "2017297";
+  const [roll_no, setRollNo] = useState(() => localStorage.getItem("roll_no"));
+  const navigate = useNavigate();
+  const validateUser = useCallback(async () => {
+    if (!token) {
+      console.error("No authentication token found!");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("roll_no");
+      notifications.show({
+        title: "Authentication Error",
+        message: "Token Invalid/Expired! Redirecting to login page.",
+        color: "red",
+      });
+      return navigate("/accounts/login");
+    }
+
+    try {
+      const { data } = await axios.get(authRoute, {
+        headers: { Authorization: `Token ${token}` },
+      });
+
+      console.log("User Data for event:", data);
+      if (!roll_no) {
+        setRollNo(data.roll_no);
+        localStorage.setItem("roll_no", data.roll_no); // Store globally
+      }
+      console.log(roll_no);
+    } catch (error) {
+      console.error("User validation failed:", error);
+      notifications.show({
+        title: "Session Expired",
+        message: "Your session has expired. Please log in again.",
+        color: "red",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    validateUser();
+  }, [validateUser]);
 
   const { data, error } = useGetNewsLetterEvent(roll_no, token);
 
-  const isFetched = useRef(false);
   useEffect(() => {
-    if (data && !isFetched.current) {
+    if (data && !fetchedEvents) {
       setFetchedEvents(data);
-      isFetched.current = true;
+      localStorage.setItem("fetchedEvents", JSON.stringify(data));
     }
     if (error) {
       setErrorMessage("Failed to fetch events. Please try again.");
     }
-  }, [data, error]);
+  }, [data, error, fetchedEvents]);
 
   const form = useForm({
     initialValues: initialValues || {
@@ -116,12 +160,15 @@ function NewsForm({
           label="Event Name"
           placeholder="Enter event name"
           value={form.values.event.id}
-          data={fetchedEvents.map((event) => ({
-            value: JSON.stringify(event.id), // Assuming event has a `event_name` property
-            label: event.event_name,
-          }))}
-          onChange={(value) => form.setFieldValue("event", value)} // Directly access the value
-          error={form.errors.event}
+          data={
+            fetchedEvents && Array.isArray(fetchedEvents)
+              ? fetchedEvents.map((event) => ({
+                  value: JSON.stringify(event.id),
+                  label: event.event_name,
+                }))
+              : []
+          } // Ensure default empty array
+          onChange={(value) => form.setFieldValue("event", value)}
           disabled={editMode && disabledFields.includes("event")}
           withAsterisk
         />

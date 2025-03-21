@@ -14,6 +14,7 @@ import { useGetCurrentLoginnedRoleRelatedClub } from "./BackendLogic/ApiRoutes";
 import CustomTable from "./CustomTable";
 import DownloadNewsletter from "./DownloadNewsletter";
 import ReportForm from "./EventReportForm";
+import EventReportTable from "./EventReportTable";
 
 const RegistrationForm = lazy(() => import("./RegistrationForm"));
 const EventForm = lazy(() => import("./EventForm"));
@@ -91,6 +92,10 @@ function ClubViewComponent({
   }
 
   tabs.push({ title: "Download Newsletter" });
+
+  if (user.role === "Counsellor") {
+    tabs.push({ title: "Event Reports" });
+  }
 
   const renderActiveContent = () => {
     switch (tabs[parseInt(activeclubfeature, 10)]?.title) {
@@ -183,6 +188,12 @@ function ClubViewComponent({
         return (
           <Suspense fallback={<div>Loading Event Report Form</div>}>
             <ReportForm clubName={clubName} />
+          </Suspense>
+        );
+      case "Event Reports":
+        return (
+          <Suspense fallback={<div>Loading Event Reports</div>}>
+            <EventReportTable />
           </Suspense>
         );
       default:
