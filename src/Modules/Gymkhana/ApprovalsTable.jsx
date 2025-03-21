@@ -19,7 +19,7 @@ import {
   Pill,
   ScrollArea,
 } from "@mantine/core";
-import { IconEye, IconEdit, IconSend } from "@tabler/icons-react";
+import { IconEye, IconEdit } from "@tabler/icons-react";
 import PropTypes from "prop-types";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";

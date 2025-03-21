@@ -12,10 +12,14 @@ import BudgetApprovalsWithProviders from "./BudgetApprovalTable";
 import FestForm from "./FestForm";
 import { useGetCurrentLoginnedRoleRelatedClub } from "./BackendLogic/ApiRoutes";
 import CustomTable from "./CustomTable";
+import DownloadNewsletter from "./DownloadNewsletter";
+import ReportForm from "./EventReportForm";
+import EventReportTable from "./EventReportTable";
 
 const RegistrationForm = lazy(() => import("./RegistrationForm"));
 const EventForm = lazy(() => import("./EventForm"));
 const BudgetForm = lazy(() => import("./BudgetForm"));
+const NewsLetterForm = lazy(() => import("./NewsLetterForm"));
 
 function ClubViewComponent({
   AboutClub,
@@ -82,7 +86,15 @@ function ClubViewComponent({
       { title: "Events Approval Form" },
       { title: "Budget Approval Form" },
       { title: "Fest Form" },
+      { title: "Upload for Newsletter" },
+      { title: "Event Report Form" },
     );
+  }
+
+  tabs.push({ title: "Download Newsletter" });
+
+  if (user.role === "Counsellor") {
+    tabs.push({ title: "Event Reports" });
   }
 
   const renderActiveContent = () => {
@@ -158,6 +170,30 @@ function ClubViewComponent({
         return (
           <Suspense fallback={<div>Loading Budget Approval Form...</div>}>
             <BudgetForm clubName={clubName} />
+          </Suspense>
+        );
+      case "Upload for Newsletter":
+        return (
+          <Suspense fallback={<div>Loading Newsletter Form...</div>}>
+            <NewsLetterForm clubName={clubName} />
+          </Suspense>
+        );
+      case "Download Newsletter":
+        return (
+          <Suspense fallback={<div>Loading options</div>}>
+            <DownloadNewsletter clubName={clubName} />
+          </Suspense>
+        );
+      case "Event Report Form":
+        return (
+          <Suspense fallback={<div>Loading Event Report Form</div>}>
+            <ReportForm clubName={clubName} />
+          </Suspense>
+        );
+      case "Event Reports":
+        return (
+          <Suspense fallback={<div>Loading Event Reports</div>}>
+            <EventReportTable />
           </Suspense>
         );
       default:

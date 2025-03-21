@@ -1,5 +1,5 @@
 import { useState, Suspense, lazy, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Box, Paper, Select, Group, Text } from "@mantine/core";
 import dayjs from "dayjs";
 import { useMediaQuery } from "@mantine/hooks";
@@ -11,7 +11,6 @@ import DateSelector from "./calender/DateSelector";
 import EventCalendar from "./calender/EventCalender";
 import EventCard from "./calender/EventCard";
 
-import { festColumns, festData } from "./makeData";
 import {
   useGetClubMembers,
   useGetData,
@@ -25,7 +24,6 @@ const CustomTable = lazy(() => import("./CustomTable"));
 const ClubViewComponent = lazy(() => import("./ClubViewComponent"));
 
 function GymkhanaDashboard() {
-  const user = useSelector((state) => state.user);
   const isMobile = useMediaQuery(`(max-width: 750px)`);
   const token = localStorage.getItem("authToken");
   const dispatch = useDispatch();
@@ -48,6 +46,7 @@ function GymkhanaDashboard() {
     value,
     token,
   );
+  // eslint-disable-next-line no-unused-vars
   const { data: clubDetails, refetch: refetchClubDetail } = useGetData(
     value,
     token,
