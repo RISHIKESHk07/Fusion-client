@@ -10,11 +10,14 @@ import EventApprovalsWithProviders from "./ApprovalsTable";
 import CoordinatorMembersWithProviders from "./CoordinatorMembersTable";
 import BudgetApprovalsWithProviders from "./BudgetApprovalTable";
 import { useGetCurrentLoginnedRoleRelatedClub } from "./BackendLogic/ApiRoutes";
+import DownloadNewsletter from "./DownloadNewsletter";
+import ReportForm from "./EventReportForm";
 
 const RegistrationForm = lazy(() => import("./RegistrationForm"));
 const CustomTable = lazy(() => import("./CustomTable"));
 const EventForm = lazy(() => import("./EventForm"));
 const BudgetForm = lazy(() => import("./BudgetForm"));
+const NewsLetterForm = lazy(() => import("./NewsLetterForm"));
 
 function ClubViewComponent({
   AboutClub,
@@ -80,8 +83,12 @@ function ClubViewComponent({
       { title: "Budget Approval" },
       { title: "Events Approval Form" },
       { title: "Budget Approval Form" },
+      { title: "Upload for Newsletter" },
+      { title: "Event Report Form" },
     );
   }
+
+  tabs.push({ title: "Download Newsletter" });
 
   const renderActiveContent = () => {
     switch (tabs[parseInt(activeclubfeature, 10)]?.title) {
@@ -156,6 +163,24 @@ function ClubViewComponent({
         return (
           <Suspense fallback={<div>Loading Budget Approval Form...</div>}>
             <BudgetForm clubName={clubName} />
+          </Suspense>
+        );
+      case "Upload for Newsletter":
+        return (
+          <Suspense fallback={<div>Loading Newsletter Form...</div>}>
+            <NewsLetterForm clubName={clubName} />
+          </Suspense>
+        );
+      case "Download Newsletter":
+        return (
+          <Suspense fallback={<div>Loading options</div>}>
+            <DownloadNewsletter clubName={clubName} />
+          </Suspense>
+        );
+      case "Event Report Form":
+        return (
+          <Suspense fallback={<div>Loading Event Report Form</div>}>
+            <ReportForm clubName={clubName} />
           </Suspense>
         );
       default:

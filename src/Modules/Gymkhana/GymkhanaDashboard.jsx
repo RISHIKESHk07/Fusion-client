@@ -146,11 +146,6 @@ function GymkhanaDashboard() {
                   clubName={value}
                   membersData={clubMembers}
                   achievementsData={Acheivements}
-                  eventsData={upcomingEvents.filter((item) => {
-                    if (item.club === value && item.status === "ACCEPT")
-                      return true;
-                    return false;
-                  })}
                   eventsData={[...upcomingEvents, ...pastEvents]
                     .filter((item) => {
                       if (item.club === value && item.status === "ACCEPT")
@@ -347,7 +342,6 @@ function GymkhanaDashboard() {
                   TableName="Upcoming Events"
                 />
               )}
-
             </Suspense>
           </Box>
           <Box>
@@ -386,8 +380,6 @@ function GymkhanaDashboard() {
               )}
             </Suspense>
           </Box>
-
-         
         </Box>
       )}
     </>

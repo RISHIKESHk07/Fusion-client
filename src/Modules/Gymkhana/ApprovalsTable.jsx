@@ -19,7 +19,7 @@ import {
   Pill,
   ScrollArea,
 } from "@mantine/core";
-import { IconEye, IconEdit, IconSend } from "@tabler/icons-react";
+import { IconEye, IconEdit } from "@tabler/icons-react";
 import PropTypes from "prop-types";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
@@ -73,7 +73,6 @@ function EventApprovals({ clubName }) {
     refetch: refetchEvents,
   } = useGetUpcomingEvents(token);
 
-
   const filteredEvents = useMemo(() => {
     return fetchedEvents.filter((event) => {
       if (
@@ -104,7 +103,7 @@ function EventApprovals({ clubName }) {
       }
       if (event.status.toLowerCase() === "dean") {
         if (
-          userRole.toLowerCase() === "dean" ||
+          userRole.toLowerCase() === "dean_s" ||
           userRole.toLowerCase() === "counsellor" ||
           userRole.toLowerCase() === "professor" ||
           userRole.toLowerCase() === "assistant professor" ||
@@ -116,7 +115,6 @@ function EventApprovals({ clubName }) {
       return false;
     });
   }, [fetchedEvents, userRole]);
-
 
   const openViewModal = (event) => {
     setSelectedEvent(event);
@@ -306,7 +304,7 @@ function EventApprovals({ clubName }) {
         </>
       );
     }
-    if (selectedEvent.status === "DEAN" && userRole === "Dean") {
+    if (selectedEvent.status === "DEAN" && userRole === "Dean_s") {
       return (
         <>
           <Button
@@ -470,7 +468,6 @@ function EventApprovals({ clubName }) {
                     ))}
                   </ScrollArea>
 
-
                   <Group position="apart" align="center">
                     <div
                       style={{
@@ -479,7 +476,6 @@ function EventApprovals({ clubName }) {
                         alignItems: "center",
                       }}
                     >
-
                       <Input
                         placeholder="Add a comment"
                         value={commentValue}
