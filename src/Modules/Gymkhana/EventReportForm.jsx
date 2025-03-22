@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useForm } from "@mantine/form";
 import dayjs from "dayjs";
 import {
@@ -8,13 +8,59 @@ import {
   Container,
   Alert,
   Modal,
-  FileInput,
+  Select,
+  NumberInput,
 } from "@mantine/core";
 import PropTypes from "prop-types";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import "./GymkhanaForms.css";
 import { DateInput, TimeInput } from "@mantine/dates";
+import { useNavigate } from "react-router-dom";
+import { notifications } from "@mantine/notifications";
+import { authRoute } from "../../routes/globalRoutes";
+import { useGetNewsLetterEvent } from "./BackendLogic/ApiRoutes";
+
+export const useCreateNewEvent = (
+  token,
+  setSuccessMessage,
+  setErrorMessage,
+  setIsModalOpen,
+  form,
+) => {
+  return useMutation({
+    mutationFn: (newEventData) => {
+      const formData = new FormData();
+      Object.keys(newEventData).forEach((key) => {
+        if (newEventData[key] !== null && newEventData[key] !== undefined) {
+          formData.append(key, newEventData[key]);
+        }
+      });
+
+      console.log(formData);
+      return axios.post(
+        "http://127.0.0.1:8000/gymkhana/api/add_event_report/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Token ${token}`,
+          },
+        },
+      );
+    },
+    onSuccess: (response) => {
+      console.log("Successfully created event:", response.data);
+      setSuccessMessage("Event created successfully!");
+      setIsModalOpen(true);
+      form.reset();
+    },
+    onError: (submit_error) => {
+      console.error("Error during event creation:", submit_error);
+      setErrorMessage("Failed to create event. Please try again.");
+    },
+  });
+};
 
 function EventReportForm({
   clubName,
@@ -27,25 +73,77 @@ function EventReportForm({
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [fetchedEvents, setFetchedEvents] = useState(() => {
+    const storedEvents = localStorage.getItem("fetchedEvents");
+    return storedEvents ? JSON.parse(storedEvents) : null;
+  });
+  const [roll_no, setRollNo] = useState(() => localStorage.getItem("roll_no"));
+  const navigate = useNavigate();
+  const validateUser = useCallback(async () => {
+    if (!token) {
+      console.error("No authentication token found!");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("roll_no");
+      notifications.show({
+        title: "Authentication Error",
+        message: "Token Invalid/Expired! Redirecting to login page.",
+        color: "red",
+      });
+      return navigate("/accounts/login");
+    }
+
+    try {
+      const { data } = await axios.get(authRoute, {
+        headers: { Authorization: `Token ${token}` },
+      });
+
+      console.log("User Data for event:", data);
+      if (!roll_no) {
+        setRollNo(data.roll_no);
+        localStorage.setItem("roll_no", data.roll_no); // Store globally
+      }
+      console.log(roll_no);
+    } catch (error) {
+      console.error("User validation failed:", error);
+      notifications.show({
+        title: "Session Expired",
+        message: "Your session has expired. Please log in again.",
+        color: "red",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    validateUser();
+  }, [validateUser]);
+
+  const { data, error } = useGetNewsLetterEvent(roll_no, token);
+
+  useEffect(() => {
+    if (data && !fetchedEvents) {
+      setFetchedEvents(data);
+      localStorage.setItem("fetchedEvents", JSON.stringify(data));
+    }
+    if (error) {
+      setErrorMessage("Failed to fetch events. Please try again.");
+    }
+  }, [data, error, fetchedEvents]);
 
   const form = useForm({
     initialValues: initialValues || {
-      event_name: "",
+      event: "",
+      description: "",
       venue: "",
       incharge: "",
+      start_date: null,
       end_date: null,
       start_time: "",
       end_time: "",
-      event_poster: "",
+      event_budget: 0,
       special_announcement: "",
       club: clubName,
-      start_date: null,
-      description: "",
-      event_budget: "",
     },
     validate: {
-      event_name: (value) =>
-        value.length < 2 ? "Title must have at least 2 letters" : null,
       venue: (value) => (value.length === 0 ? "Venue cannot be empty" : null),
       incharge: (value) =>
         value.length === 0 ? "Incharge cannot be empty" : null,
@@ -54,41 +152,23 @@ function EventReportForm({
         value.length === 0 ? "Start time cannot be empty" : null,
       end_time: (value) =>
         value.length === 0 ? "End time cannot be empty" : null,
-      event_poster: (value) =>
-        value.length === 0 ? "Event poster cannot be empty" : null,
       description: (value) =>
         value.length === 0 ? "Description cannot be empty" : null,
       start_date: (value) => (!value ? "Start date cannot be empty" : null),
       event_budget: (value) =>
-        value.length === 0 ? "Event budget cannot be empty" : null,
-    },
-  });
-  const mutation = useMutation({
-    mutationFn: (newEventData) => {
-      return axios.put(
-        "http://127.0.0.1:8000/gymkhana/api/new_event/",
-        newEventData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data", // For file uploads
-            Authorization: `Token ${token}`,
-          },
-        },
-      );
-    },
-    onSuccess: (response) => {
-      console.log("Successfully requested:", response.data);
-      setSuccessMessage("Event request forwarded successfully!");
-      setIsModalOpen(true);
-      form.reset();
-    },
-    onError: (error) => {
-      console.error("Error during forwarding request:", error);
-      setErrorMessage("Request failed. Please try again.");
+        value <= 0 ? "Budget must be a positive number" : null,
     },
   });
 
-  const handleSubmit = (values) => {
+  const mutation = useCreateNewEvent(
+    token,
+    setSuccessMessage,
+    setErrorMessage,
+    setIsModalOpen,
+    form,
+  );
+
+  const handleSubmit = async (values) => {
     if (editMode && onSubmit) {
       onSubmit(values);
       return;
@@ -102,8 +182,12 @@ function EventReportForm({
       end_date: values.end_date
         ? dayjs(values.end_date).format("YYYY-MM-DD")
         : null,
+      event_budget: Number(values.event_budget),
+      club: clubName,
     };
+    console.log("Formatted values for submission:", formattedValues);
     mutation.mutate(formattedValues);
+    console.log(form);
   };
 
   return (
@@ -122,17 +206,23 @@ function EventReportForm({
           </Alert>
         )}
 
-        <TextInput
-          label="Event Name"
-          placeholder="Enter event name"
-          value={form.values.event_name}
-          onChange={(event) =>
-            form.setFieldValue("event_name", event.currentTarget.value)
-          }
-          error={form.errors.event_name}
-          disabled={editMode && disabledFields.includes("event_name")}
+        <Select
+          label="Event"
+          placeholder="Enter event"
+          value={form.values.event}
+          data={
+            fetchedEvents && Array.isArray(fetchedEvents)
+              ? fetchedEvents.map((event) => ({
+                  value: event.id.toString(),
+                  label: event.event_name,
+                }))
+              : []
+          } // Ensure default empty array
+          onChange={(value) => form.setFieldValue("event", value)}
+          disabled={editMode && disabledFields.includes("event")}
           withAsterisk
         />
+
         <TextInput
           label="Description"
           placeholder="Enter the event description"
@@ -212,25 +302,15 @@ function EventReportForm({
           disabled={editMode && disabledFields.includes("end_time")}
           withAsterisk
         />
-        <FileInput
-          label="Event Poster"
-          placeholder="Upload Event Poster"
-          value={form.values.event_poster}
-          onChange={(file) => form.setFieldValue("event_poster", file)}
-          error={form.errors.event_poster}
-          // disabled={editMode && disabledFields.includes("event_poster")}
-          withAsterisk
-          accept=".pdf"
-        />
-        <FileInput
+        <NumberInput
           label="Event Budget"
-          placeholder="Upload Event Budget"
+          placeholder="Enter Event Budget"
           value={form.values.event_budget}
-          onChange={(file) => form.setFieldValue("event_budget", file)}
+          onChange={(value) => form.setFieldValue("event_budget", value)}
           error={form.errors.event_budget}
-          // disabled={editMode && disabledFields.includes("event_poster")}
+          disabled={editMode && disabledFields.includes("event_budget")}
           withAsterisk
-          accept=".pdf"
+          precision={2}
         />
         <TextInput
           label="Special Announcement"
@@ -239,7 +319,7 @@ function EventReportForm({
           onChange={(event) =>
             form.setFieldValue(
               "special_announcement",
-              event.currentTarget.special_announcement,
+              event.currentTarget.value,
             )
           }
           error={form.errors.special_announcement}
