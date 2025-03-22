@@ -193,7 +193,7 @@ function ClubViewComponent({
       case "Event Reports":
         return (
           <Suspense fallback={<div>Loading Event Reports</div>}>
-            <EventReportTable />
+            <EventReportTable clubName={clubName} />
           </Suspense>
         );
       default:
