@@ -44,6 +44,27 @@ function EventReportTable({ clubName }) {
       });
   }, [clubName]);
 
+  const openPdfReport = (reportId) => {
+    if (reportId) {
+      const pdfUrl = `http://localhost:8000/gymkhana/api/event_report_pdf/${reportId}/`;
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      fetch(pdfUrl, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      })
+        .then((response) => response.blob())
+        .then((blob) => {
+          const url = window.URL.createObjectURL(blob);
+          window.open(url, "_blank");
+        })
+        .catch((error) => {
+          console.error("Error fetching PDF:", error);
+        });
+    }
+  };
+
   const table = useMantineReactTable({
     columns,
     data: events,
@@ -59,10 +80,7 @@ function EventReportTable({ clubName }) {
     renderRowActions: ({ row }) => (
       <ActionIcon
         color="blue"
-        component="a"
-        href={row.original.report_pdf}
-        target="_blank"
-        rel="noopener noreferrer"
+        onClick={() => openPdfReport(row.id)}
         disabled={!row.original.report_pdf}
         title="View Report"
       >
