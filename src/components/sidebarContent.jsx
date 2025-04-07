@@ -48,11 +48,20 @@ function SidebarContent({ isCollapsed, toggleSidebar }) {
     "complaint_management",
     "mess_management",
     "visitor_hostel",
+    "hostel_management",
     "department",
     "gymkhana",
     "iwd",
     "phc",
     "spacs",
+    "placement_cell",
+    "purchase_and_store",
+    "rspc",
+    "inventory_management",
+    "program_and_curriculum",
+    "course_registration",
+    "examinations",
+    "other_academics",
   ];
 
   const Modules = [
@@ -73,7 +82,12 @@ function SidebarContent({ isCollapsed, toggleSidebar }) {
       label: "Program & Curriculum",
       id: "program_and_curriculum",
       icon: <CurriculumIcon size={18} />,
-      url: "/",
+      url:
+        role === "acadadmin" || role === "studentacadadmin"
+          ? "/programme_curriculum/acad_view_all_programme"
+          : role === "student"
+            ? "/programme_curriculum/view_all_programmes"
+            : "/programme_curriculum/faculty_view_all_programmes",
     },
     {
       label: "Mess Management",
@@ -115,7 +129,7 @@ function SidebarContent({ isCollapsed, toggleSidebar }) {
       label: "Placement Cell",
       id: "placement_cell",
       icon: <PlacementIcon size={18} />,
-      url: "/",
+      url: "/placement-cell",
     },
     {
       label: "Department Portal",
@@ -124,16 +138,22 @@ function SidebarContent({ isCollapsed, toggleSidebar }) {
       url: "/department",
     },
     {
-      label: "Research",
+      label: "Research Projects",
       id: "rspc",
       icon: <ResearchIcon size={18} />,
-      url: "/",
+      url: "/research",
+    },
+    {
+      label: "Inventory",
+      id: "inventory_management",
+      icon: <ResearchIcon size={18} />,
+      url: "/inventory",
     },
     {
       label: "Purchase and Store",
       id: "purchase_and_store",
       icon: <StoreIcon size={18} />,
-      url: "/",
+      url: "/purchase",
     },
     {
       label: "Human Resource",
@@ -145,7 +165,7 @@ function SidebarContent({ isCollapsed, toggleSidebar }) {
       label: "Examination",
       id: "examinations",
       icon: <ExamIcon size={18} />,
-      url: "/",
+      url: "/examination",
     },
     {
       label: "Gymkhana",
@@ -163,13 +183,13 @@ function SidebarContent({ isCollapsed, toggleSidebar }) {
       label: "Hostel Management",
       id: "hostel_management",
       icon: <HostelIcon size={18} />,
-      url: "/",
+      url: "/hostel",
     },
     {
       label: "Other Academic Procedure",
       id: "other_academics",
       icon: <OtherAcademicIcon size={18} />,
-      url: "/",
+      url: "/otherAcadProcedures",
     },
   ];
 

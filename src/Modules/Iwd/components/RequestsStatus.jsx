@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Container, Table, Button, Title, Loader, Grid } from "@mantine/core";
+import {
+  Container,
+  Table,
+  Button,
+  Title,
+  Loader,
+  Grid,
+  Select,
+  Paper,
+} from "@mantine/core";
 import { CaretLeft } from "@phosphor-icons/react";
 import ViewRequestFile from "./ViewRequestFile";
 import { IWD_ROUTES } from "../routes/iwdRoutes";
@@ -11,6 +20,8 @@ function CreatedRequests() {
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+
   const handleViewRequest = (request) => {
     setSelectedRequest(request);
   };
@@ -30,8 +41,23 @@ function CreatedRequests() {
     });
   }, [role, refresh]);
 
+  const filteredRequests = createdRequestsList.filter(
+    (request) => statusFilter === "all" || request.status === statusFilter,
+  );
+  const statusList = [
+    { value: "all", label: "All" },
+    { value: "Work Completed", label: "Work Completed" },
+    {
+      value: "Approved by the director",
+      label: "Approved",
+    },
+    { value: "Rejected by the director", label: "Rejected" },
+    { value: "Pending", label: "Pending" },
+    { value: "Work Order issued", label: "Work Order issued" },
+    { value: "Approved by the dean", label: "Approved by the dean" },
+  ];
   return (
-    <Container style={{ padding: "10px", fontFamily: "Arial, sans-serif" }}>
+    <Container style={{ fontFamily: "Arial, sans-serif" }}>
       <br />
       {loading ? (
         <Grid mt="xl">
@@ -40,18 +66,35 @@ function CreatedRequests() {
           </Container>
         </Grid>
       ) : !selectedRequest ? (
-        <div
+        <Paper
           style={{
-            border: "1px solid #ccc",
-            borderRadius: "25px",
             padding: "20px",
             boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.15)",
-            borderLeft: "10px solid #1E90FF",
+            borderLeft: "0.6rem solid #15ABFF",
+            width: "80vw",
+            position: "absolute",
+            right: "10vw",
+            overflow: "auto",
+            margin: "0 auto",
           }}
         >
           <Title size="26px" align="center" mb="md">
             Requests Status
           </Title>
+          <Select
+            label="Filter by Status"
+            placeholder="Select status"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            data={statusList}
+            style={{
+              top: "10px",
+              right: "10px",
+              marginBottom: "20px",
+              width: "200px",
+              padding: "auto",
+            }}
+          />
           <Table highlightOnHover>
             <thead style={{ backgroundColor: "#f5f5f5" }}>
               <tr>
@@ -65,7 +108,7 @@ function CreatedRequests() {
               </tr>
             </thead>
             <tbody>
-              {createdRequestsList.map((request, index) => (
+              {filteredRequests.map((request, index) => (
                 <tr key={index} id={request.request_id}>
                   <td>{request.request_id}</td>
                   <td>{request.name}</td>
@@ -90,7 +133,7 @@ function CreatedRequests() {
               ))}
             </tbody>
           </Table>
-        </div>
+        </Paper>
       ) : (
         <>
           <Button

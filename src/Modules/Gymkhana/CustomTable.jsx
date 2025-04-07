@@ -4,7 +4,7 @@ import { useState } from "react";
 
 function CustomTable({ data, columns, TableName }) {
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
+  const pageSize = 5;
 
   const paginatedData = data.slice(
     pageIndex * pageSize,

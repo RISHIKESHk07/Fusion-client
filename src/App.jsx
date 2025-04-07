@@ -6,15 +6,48 @@ import "@mantine/notifications/styles.css";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Notifications } from "@mantine/notifications";
 import { Layout } from "./components/layout";
-
-// import { IwdRoutes } from "./Modules/Iwd/routes/index";
-import IwdModule from "./Modules/Iwd/index";
-import { DesignationsProvider } from "./Modules/Iwd/helper/designationContext";
-import { HealthCenter } from "./Modules/Health Center";
+import InventoryIndex from "./Modules/Inventory/components/InventoryIndex";
 
 // eslint-disable-next-line import/no-unresolved
-import ConvenorBreadcumbs from "./Modules/Scholarship/convenor/components/ConvenorBreadcumbs";
+import { DesignationsProvider } from "./Modules/Iwd/helper/designationContext";
 import UserBreadcrumbs from "./Modules/Scholarship/user/components/UserBreadcumbs";
+import OtherAcadProcedures from "./Modules/Otheracademic/OtherAcademicProcedures";
+
+const PlacementCellPage = lazy(() => import("./Modules/PlacementCell"));
+const JobApplicationForm = lazy(
+  () => import("./Modules/PlacementCell/ApplyForPlacementForm"),
+);
+const PlacementEventHandeling = lazy(
+  () => import("./Modules/PlacementCell/components/PlacementEventHandeling"),
+);
+const ApplicationStatusTimeline = lazy(
+  () => import("./Modules/PlacementCell/components/Timeline"),
+);
+
+const HealthCenter = lazy(() => import("./Modules/Health Center"));
+const PurchaseNavbar = lazy(() => import("./Modules/Purchase/PurchaseNavbar"));
+const Inbox = lazy(() => import("./Modules/Purchase/Inbox"));
+const FiledIndents = lazy(() => import("./Modules/Purchase/FilledIndents.jsx"));
+const ViewIndentInbox = lazy(
+  () => import("./Modules/Purchase/ViewIndentInbox.jsx"),
+);
+const EmployeeViewFileIndent = lazy(
+  () => import("./Modules/Purchase/EmployeeViewFileIndent"),
+);
+const Archieved = lazy(() => import("./Modules/Purchase/ArchievedIndents"));
+const ViewIndent = lazy(() => import("./Modules/Purchase/ViewIndent"));
+const StockEntry = lazy(() => import("./Modules/Purchase/StockEntry"));
+const SavedIndents = lazy(() => import("./Modules/Purchase/SavedIndentes"));
+const Outbox = lazy(() => import("./Modules/Purchase/Outbox.jsx"));
+const IndentForm = lazy(() => import("./Modules/Purchase/IndentForm.jsx"));
+const NewForwardIndent = lazy(
+  () => import("./Modules/Purchase/NewForwardIndent.jsx"),
+);
+const ConvenorBreadcumbs = lazy(
+  () => import("./Modules/Scholarship/convenor/components/ConvenorBreadcumbs"),
+);
+const HostelPage = lazy(() => import("./Modules/Hostel-Management/index"));
+const IwdModule = lazy(() => import("./Modules/Iwd/index"));
 
 const Dashboard = lazy(
   () => import("./Modules/Dashboard/dashboardNotifications"),
@@ -31,6 +64,8 @@ const AcademicPage = lazy(() => import("./Modules/Academic/index"));
 const ValidateAuth = lazy(() => import("./helper/validateauth"));
 const MessPage = lazy(() => import("./Modules/Mess/pages/index"));
 const FileTracking = lazy(() => import("./Modules/FileTracking"));
+const ResearchProjects = lazy(() => import("./Modules/RSPC/researchProjects"));
+const RequestForms = lazy(() => import("./Modules/RSPC/requestForms"));
 const VisitorsContent = lazy(
   () => import("./Modules/Visitors_Hostel/visitorsContent"),
 );
@@ -71,6 +106,12 @@ const GymkhanaDashboard = lazy(
   () => import("./Modules/Gymkhana/GymkhanaDashboard.jsx"),
 );
 
+const Examination = lazy(() => import("./Modules/Examination/examination"));
+
+const ProgrammeCurriculumRoutes = lazy(
+  () => import("./Modules/Program_curriculum/programmCurriculum"),
+);
+
 const theme = createTheme({
   breakpoints: { xs: "30em", sm: "48em", md: "64em", lg: "74em", xl: "90em" },
 });
@@ -107,6 +148,26 @@ export default function App() {
           }
         />
         <Route
+          path="/programme_curriculum/*"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <ProgrammeCurriculumRoutes />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/examination/*"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <Examination />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
           path="/mess"
           element={
             <Layout>
@@ -117,13 +178,55 @@ export default function App() {
           }
         />
         <Route
-          path="/mess"
+          path="/placement-cell"
           element={
             <Layout>
-              <MessPage />
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PlacementCellPage />
+              </Suspense>
             </Layout>
           }
         />
+        <Route
+          path="/placement-cell/apply-placement"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <JobApplicationForm />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/placement-cell/view"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PlacementEventHandeling />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/placement-cell/timeline"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <ApplicationStatusTimeline />
+              </Suspense>
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/inventory"
+          element={
+            <Layout>
+              <InventoryIndex />
+            </Layout>
+          }
+        />
+
         <Route
           path="/profile"
           element={
@@ -285,109 +388,44 @@ export default function App() {
           }
         />
         <Route
+          path="/hostel"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <HostelPage />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
           path="/iwd"
           element={
             <DesignationsProvider>
               <Layout>
-                <IwdModule />
+                <Suspense fallback={<div>Loading .... </div>}>
+                  <IwdModule />
+                </Suspense>
               </Layout>
             </DesignationsProvider>
           }
         />
         <Route
-          path="/filetracking"
+          path="/research"
           element={
             <Layout>
-              <FileTracking />
+              <Suspense fallback={<div>Loading .... </div>}>
+                <ResearchProjects />
+              </Suspense>
             </Layout>
           }
         />
         <Route
-          path="/visitors_hostel"
+          path="/research/forms"
           element={
             <Layout>
-              <VisitorsContent />
-              <Bookings />
-            </Layout>
-          }
-        />
-        <Route
-          path="/visitors_hostel/cancel_request"
-          element={
-            <Layout>
-              <VisitorsContent />
-              <CancellationRequest />
-            </Layout>
-          }
-        />
-        <Route
-          path="/visitors_hostel/active_bookings"
-          element={
-            <Layout>
-              <VisitorsContent />
-              <ActiveBookingsPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/visitors_hostel/completed_bookings"
-          element={
-            <Layout>
-              <VisitorsContent />
-              <CompletedBookingsPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/visitors_hostel/booking-form"
-          element={
-            <Layout>
-              <VisitorsContent />
-              <BookingForm />
-            </Layout>
-          }
-        />
-        <Route
-          path="/visitors_hostel/room-availability"
-          element={
-            <Layout>
-              <VisitorsContent />
-              <RoomsAvailibility />
-            </Layout>
-          }
-        />
-        <Route
-          path="/visitors_hostel/mess-record"
-          element={
-            <Layout>
-              <VisitorsContent />
-            </Layout>
-          }
-        />
-        <Route
-          path="/visitors_hostel/inventory"
-          element={
-            <Layout>
-              <VisitorsContent />
-              <InventoryManagement />
-            </Layout>
-          }
-        />
-        <Route
-          path="/visitors_hostel/account-statement"
-          element={
-            <Layout>
-              <VisitorsContent />
-              <AccountStatemnts />
-            </Layout>
-          }
-        />
-        <Route
-          path="/visitors_hostel/rules"
-          element={
-            <Layout>
-              <VisitorsContent />
-              <VHGuidelinesPage />
+              <Suspense fallback={<div>Loading .... </div>}>
+                <RequestForms />
+              </Suspense>
             </Layout>
           }
         />
@@ -395,40 +433,163 @@ export default function App() {
           path="/facultyprofessionalprofile/*"
           element={
             <Layout>
-              <FacultyProfessionalProfile />
-            </Layout>
-          }
-        />
-        <Route
-          path="/complaints"
-          element={
-            <Layout>
-              <ComplaintSystem />
-            </Layout>
-          }
-        />
-        <Route
-          path="/department"
-          element={
-            <Layout>
-              <DepartmentPage />
+              <Suspense fallback={<div>Loading .... </div>}>
+                <FacultyProfessionalProfile />
+              </Suspense>
             </Layout>
           }
         />
 
-        {/* scholarship */}
         <Route
           path="/scholarship"
           element={
             <Layout>
-              {role === "spacsconvenor" && <ConvenorBreadcumbs />}
-              {role === "student" && <UserBreadcrumbs />}
-              {role === "spacsassistant" && <ConvenorBreadcumbs />}
+              <Suspense fallback={<div>Loading .... </div>}>
+                {role === "spacsconvenor" && <ConvenorBreadcumbs />}
+                {role === "student" && <UserBreadcrumbs />}
+                {role === "spacsassistant" && <ConvenorBreadcumbs />}
+              </Suspense>
             </Layout>
           }
         />
 
         <Route path="/healthcenter/*" element={<HealthCenter />} />
+        <Route
+          path="/purchase"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <div style={{ margin: "32px" }}>
+                  {/* <MultiItemIndentForm /> */}
+                  <IndentForm />
+                </div>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/all_filed_indents"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <div style={{ margin: "32px" }}>
+                  <FiledIndents />
+                </div>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/inbox"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <div style={{ margin: "32px" }}>
+                  <Inbox />
+                </div>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/forward_indent/:indentID"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                {/* <ForwardIndent /> */}
+                <NewForwardIndent />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/saved_indents"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <div style={{ margin: "32px" }}>
+                  <SavedIndents />
+                </div>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/archieved_indents"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <div style={{ margin: "32px" }}>
+                  <Archieved />
+                </div>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/outbox"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <div style={{ margin: "32px" }}>
+                  <Outbox />
+                </div>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/viewindent/:indentID"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <ViewIndentInbox />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/viewsavedindent/:indentID"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <ViewIndent />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/employeeviewfiledindent/:indentID"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <EmployeeViewFileIndent />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/purchase/stock_entry"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <PurchaseNavbar />
+                <StockEntry />
+              </Suspense>
+            </Layout>
+          }
+        />
+
         <Route path="/accounts/login" element={<LoginPage />} />
         <Route path="/reset-password" element={<ForgotPassword />} />
         <Route
@@ -437,6 +598,16 @@ export default function App() {
             <Layout>
               <Suspense fallback={<div>Loading .... </div>}>
                 <GymkhanaDashboard />
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="/otherAcadProcedures"
+          element={
+            <Layout>
+              <Suspense fallback={<div>Loading .... </div>}>
+                <OtherAcadProcedures />
               </Suspense>
             </Layout>
           }

@@ -1,3 +1,5 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 import axios from "axios";
 import { IWD_ROUTES } from "../routes/iwdRoutes";
 
@@ -50,9 +52,9 @@ const GetFileData = async ({ setLoading, request, setMessages }) => {
       params,
     });
     setMessages(response.data);
-    setLoading(false);
   } catch (error) {
     console.error(error);
+  } finally {
     setLoading(false);
   }
 };
@@ -140,7 +142,7 @@ const HandleIssueWorkOrder = async ({
   data,
   setIsLoading,
   setIsSuccess,
-  onBack,
+  submitter,
 }) => {
   /* 
     This function is for issuing work order for requests approved by director
@@ -175,7 +177,7 @@ const HandleIssueWorkOrder = async ({
       setIsLoading(false);
       setIsSuccess(true);
       setTimeout(() => {
-        onBack();
+        submitter();
       }, 1000);
     }, 1000);
   } catch (error) {
@@ -336,7 +338,7 @@ const HandleMarkAsCompleted = async ({
   }
 };
 
-const HandleEngineerProcess = async ({
+const ForwardRequest = async ({
   form,
   request,
   setIsLoading,
@@ -356,8 +358,52 @@ const HandleEngineerProcess = async ({
   formData.fileid = request.file_id;
   formData.role = role;
   try {
+    const response = await axios.post(IWD_ROUTES.FORWARD_REQUEST, formData, {
+      headers: {
+        Authorization: `Token ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    console.log(response);
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        handleBackToList();
+      }, 1000);
+    }, 1000);
+  } catch (error) {
+    console.log(error);
+    setIsLoading(false);
+  }
+};
+
+const HandleAdminApproval = async ({
+  form,
+  request,
+  setIsLoading,
+  setIsSuccess,
+  handleBackToList,
+  role,
+  action,
+}) => {
+  /* 
+    This function is for approving/rejecting requests for IWD Admin
+    Used in :
+    - ViewRequestFile
+  */
+  console.log("admin approval");
+  setIsLoading(true);
+  setIsSuccess(false);
+  const token = localStorage.getItem("authToken");
+  const formData = form.getValues();
+  formData.fileid = request.file_id;
+  formData.role = role;
+  formData.action = action;
+  try {
     const response = await axios.post(
-      IWD_ROUTES.HANDLE_ENGINEER_PROCESS,
+      IWD_ROUTES.HANDLE_ADMIN_APPROVAL,
       formData,
       {
         headers: {
@@ -472,6 +518,100 @@ const HandleDeanProcessRequest = async ({
     setIsLoading(false);
   }
 };
+const HandleProposalSubmission = async ({
+  setIsLoading,
+  setIsSuccess,
+  submitter,
+  form,
+}) => {
+  setIsLoading(true);
+  setIsSuccess(false);
+
+  const token = localStorage.getItem("authToken");
+  const payload = {
+    ...form.values,
+    supporting_documents: form.values.supporting_documents || null,
+    items: form.values.items.map((item) => ({
+      name: item.name,
+      description: item.description,
+      unit: item.unit,
+      price_per_unit: item.price_per_unit,
+      quantity: item.quantity,
+      docs: item.docs || null,
+    })),
+  };
+  console.log(payload);
+
+  try {
+    const response = await axios.post(IWD_ROUTES.CREATE_PROPOSAL, payload, {
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+    });
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error("Failed to submit form");
+    }
+
+    setIsSuccess(true);
+    setTimeout(() => {
+      setIsSuccess(false);
+      submitter();
+    }, 1500);
+  } catch (error) {
+    console.error("Error submitting proposal:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+const GetProposals = async ({
+  setLoading,
+  setProposalList,
+  requestId,
+  setProposalIds,
+}) => {
+  setLoading(true);
+  const token = localStorage.getItem("authToken");
+
+  try {
+    console.log("Requesting proposals with Request ID:", requestId);
+    const response = await axios.get(`${IWD_ROUTES.VIEW_PROPOSALS}`, {
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+      params: { request_id: requestId },
+    });
+    const proposals = response.data || [];
+    const proposalIds = proposals.map((proposal) => proposal.id);
+    setProposalIds(proposalIds);
+
+    setProposalList(response.data || []);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+const GetItems = async (setLoading, proposalId) => {
+  console.log(setLoading);
+  const token = localStorage.getItem("authToken");
+  setLoading(true);
+  try {
+    let allItems = {};
+    const response = await axios.get(IWD_ROUTES.VIEW_ITEMS, {
+      headers: { Authorization: `Token ${token}` },
+      params: { proposal_id: proposalId },
+    });
+    allItems = response.data;
+    return allItems;
+  } catch (error) {
+    console.error("Error fetching items:", error);
+  } finally {
+    setLoading(false);
+  }
+  return [];
+};
 
 export {
   GetRequestsOrBills,
@@ -481,9 +621,13 @@ export {
   HandleAddBudget,
   HandleIssueWorkOrder,
   HandleUpdateRequest,
+  HandleAdminApproval,
   HandleDirectorApproval,
   HandleMarkAsCompleted,
   HandleEditBudget,
   HandleDeanProcessRequest,
-  HandleEngineerProcess,
+  ForwardRequest,
+  HandleProposalSubmission,
+  GetProposals,
+  GetItems,
 };

@@ -12,7 +12,6 @@ function IwdPage() {
   const [breadcrumbItems, setBreadcrumbItems] = useState([]);
   const tabsListRef = useRef(null);
   const { roleBasedTabs, tabItems } = RoleBasedFilter({ setActiveTab });
-
   const filteredTabs = useMemo(() => {
     return roleBasedTabs[role] || tabItems;
   }, [role]);
@@ -49,7 +48,15 @@ function IwdPage() {
     // console.log(breadcrumbItems);
     // console.log(activeTab);
   }, [activeTab, filteredTabs]);
-
+  if (!Object.keys(roleBasedTabs).includes(role)) {
+    return (
+      <Flex justify="center" align="center" style={{ height: "100vh" }}>
+        <Text color="red" size="lg">
+          Unauthorized Access
+        </Text>
+      </Flex>
+    );
+  }
   return (
     <>
       {/* <Breadcrumbs>{breadcrumbItems}</Breadcrumbs> */}

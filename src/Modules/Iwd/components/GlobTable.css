@@ -9,6 +9,7 @@ body {
     padding: 20px;
     font-family: Arial, sans-serif;
     max-width: 800px;
+    /* overflow-y: auto; */
   }
   
   .breadcrumb {
@@ -79,6 +80,7 @@ body {
   table {
     border-collapse: collapse;
     margin-bottom: 20px;
+    table-layout: auto;
   }
   
   table th,
@@ -106,9 +108,145 @@ body {
   
   .details-wrapper {
     border: 1px solid #ccc;
-    border-radius: 25px;
+    /* border-radius: 25px; */
     padding: 20px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.15);
     border-left: 10px solid #1e90ff;
   }
   
+  @media (max-width: 1024px) {
+    .container {
+      padding: 15px;
+      max-width: 90%;
+    }
+  
+    .breadcrumb {
+      font-size: 18px;
+    }
+  
+    .buttons-container button {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+  
+    .bold-button {
+      font-size: 14px;
+    }
+  
+    .arrow {
+      width: 25px;
+      height: 25px;
+      font-size: 16px;
+    }
+  
+    .work-orders-table {
+      padding: 15px;
+    }
+  
+    .details-wrapper {
+      padding: 15px;
+    }
+  
+    table th,
+    table td {
+      font-size: 12px;
+      padding: 8px;
+    }
+  }
+  
+  /* For mobile screens */
+  @media (max-width: 767px) {
+    .container {
+      padding: 10px;
+      max-width: 100%;
+    }
+  
+    .breadcrumb {
+      font-size: 16px;
+      text-align: center;
+    }
+  
+    .buttons-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .buttons-container button {
+      font-size: 12px;
+      padding: 6px 10px;
+      width: 100%;
+    }
+  
+    .arrow {
+      width: 20px;
+      height: 20px;
+      font-size: 14px;
+    }
+  
+    .work-orders-table {
+      padding: 10px;
+    }
+  
+    .details-wrapper {
+      padding: 10px;
+    }
+  
+    table th,
+    table td {
+      font-size: 10px;
+      padding: 6px;
+    }
+  
+    Title {
+      font-size: 22px;
+      text-align: center;
+    }
+  }
+  
+  /* For extra small screens (less than 480px) */
+  @media (max-width: 480px) {
+    .container {
+      padding: 5px;
+      max-width: 100%;
+    }
+  
+    .breadcrumb {
+      font-size: 14px;
+    }
+  
+    .buttons-container {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .buttons-container button {
+      font-size: 10px;
+      padding: 5px 8px;
+      width: 100%;
+    }
+  
+    .arrow {
+      width: 18px;
+      height: 18px;
+      font-size: 12px;
+    }
+  
+    .work-orders-table {
+      padding: 5px;
+    }
+  
+    .details-wrapper {
+      padding: 5px;
+    }
+  
+    table th,
+    table td {
+      font-size: 8px;
+      padding: 4px;
+    }
+  
+    Title {
+      font-size: 18px;
+      text-align: center;
+    }
+  }

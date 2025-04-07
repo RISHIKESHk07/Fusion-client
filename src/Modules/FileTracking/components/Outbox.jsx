@@ -6,47 +6,29 @@ import {
   Table,
   ActionIcon,
   Tooltip,
-  Select,
-  Textarea,
-  Button,
   Group,
   TextInput,
 } from "@mantine/core";
-import { ArrowArcRight, Eye } from "@phosphor-icons/react";
+import { Eye, CaretUp, CaretDown, ArrowsDownUp } from "@phosphor-icons/react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import View from "./ViewFile";
-import {
-  forwardFileRoute,
-  outboxRoute,
-  designationsRoute,
-  createFileRoute,
-} from "../../../routes/filetrackingRoutes";
+import { outboxRoute } from "../../../routes/filetrackingRoutes";
 
 export default function Outboxfunc() {
   const [files, setFiles] = useState([]);
   const token = localStorage.getItem("authToken");
   const role = useSelector((state) => state.user.role);
   const username = useSelector((state) => state.user.roll_no);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [searchQuery, setSearchQuery] = useState("");
   let current_module = useSelector((state) => state.module.current_module);
   current_module = current_module.split(" ").join("").toLowerCase();
   const convertDate = (date) => {
     const d = new Date(date);
     return d.toLocaleString();
   };
-  const [receiver_username, setReceiverUsername] = React.useState("");
-  const [receiver_designation, setReceiverDesignation] = React.useState("");
-  const [receiver_designations, setReceiverDesignations] = React.useState("");
   const [selectedFile, setSelectedFile] = useState(null); // For viewing file details
-  const [forwardFile, setForwardFile] = useState(null); // For forwarding file
-
-  const [remarks, setRemarks] = useState(""); // State for remarks
-  const receiverRoles = Array.isArray(receiver_designations)
-    ? receiver_designations.map((receiver_role) => ({
-        value: receiver_role,
-        label: receiver_role,
-      }))
-    : [];
   useEffect(() => {
     const getFiles = async () => {
       try {
@@ -75,71 +57,42 @@ export default function Outboxfunc() {
 
     // Call the getFiles function to fetch data on component mount
     getFiles();
-  }, []);
-  const fetchRoles = async () => {
-    const response = await axios.get(
-      `${designationsRoute}${receiver_username}`,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      },
-    );
-    setReceiverDesignations(response.data.designations);
-  };
+  }, [role, token]);
   const handleBack = () => {
     setSelectedFile(null);
-    setForwardFile(null); // Reset forward file state
   };
 
-  const handleForwardFile = (file) => {
-    setForwardFile(file); // Set the file to be forwarded
-  };
+  const sortedFiles = [...files].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    const direction = sortConfig.direction === "asc" ? 1 : -1;
+    return a[sortConfig.key] > b[sortConfig.key] ? direction : -direction;
+  });
 
-  const handleSubmitForward = async () => {
-    try {
-      let response = await axios.get(`${createFileRoute}${forwardFile.id}`, {
-        withCredentials: true,
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
+  const filteredFiles = sortedFiles.filter((file) => {
+    const idString = `${file.branch}-${new Date(file.upload_date).getFullYear()}-
+                      ${(new Date(file.upload_date).getMonth() + 1)
+                        .toString()
+                        .padStart(2, "0")}
+                      -#${file.id}`;
+    return (
+      idString.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.uploader.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      convertDate(file.upload_date)
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      file.receiver_designation
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      file.receiver.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
 
-      setForwardFile(response.data);
-      const fileAttachment =
-        forwardFile.upload_file instanceof File
-          ? forwardFile.upload_file
-          : new File([forwardFile.upload_file], "uploaded_file", {
-              type: "application/octet-stream",
-            });
-
-      console.log(forwardFile.upload_file);
-      const formData = new FormData();
-      formData.append("file_attachment", fileAttachment);
-      console.log(receiver_username);
-      formData.append("receiver", receiver_username);
-      formData.append("receiver_designation", receiver_designation);
-      formData.append("remarks", remarks);
-      console.log(formData);
-      console.log(forwardFile.id);
-      response = await axios.post(
-        `${forwardFileRoute}${forwardFile.id}/`,
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        },
-      );
-      // Reset form and state
-      setForwardFile(null);
-      setReceiverDesignation(""); // Reset designation
-      setReceiverUsername("");
-      setRemarks("");
-    } catch (err) {
-      console.error("Error forwarding file:", err);
-    }
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
   };
 
   return (
@@ -156,16 +109,24 @@ export default function Outboxfunc() {
         overflowY: "auto",
       }}
     >
-      {!selectedFile && !forwardFile && (
-        <Title
-          order={2}
-          mb="md"
-          style={{
-            fontSize: "24px",
-          }}
-        >
-          Outbox
-        </Title>
+      {!selectedFile && (
+        <Group position="apart" mb="md">
+          <Title
+            order={2}
+            mb="md"
+            style={{
+              fontSize: "24px",
+            }}
+          >
+            Outbox
+          </Title>
+          <TextInput
+            placeholder="Search files..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ marginBottom: "10px", marginLeft: "auto" }}
+          />
+        </Group>
       )}
 
       {selectedFile ? (
@@ -186,66 +147,6 @@ export default function Outboxfunc() {
               setFiles(files.filter((f) => f.id !== selectedFile.id))
             }
           />
-        </div>
-      ) : forwardFile ? (
-        <div
-          style={{
-            margin: "1rem",
-            padding: "1rem",
-            borderRadius: "8px",
-            backgroundColor: "#f9f9f9",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <Title order={3} mb="md">
-            Forward File
-          </Title>
-          <Box>
-            {/* Step 1: Select the recipient's designation */}
-            <TextInput
-              label="Forward To"
-              placeholder="Enter forward recipient"
-              value={receiver_username}
-              onChange={(e) => {
-                setReceiverUsername(e.target.value);
-              }}
-              mb="sm"
-            />
-            {/* Receiver Designation as a dropdown */}
-            <Select
-              label="Receiver Designation"
-              placeholder="Select designation"
-              onClick={() => fetchRoles()}
-              value={receiver_designation}
-              data={receiverRoles}
-              mb="sm"
-              onChange={(value) => setReceiverDesignation(value)}
-            />
-
-            {/* Remarks Textarea */}
-            <Textarea
-              label="Remarks"
-              placeholder="Add any remarks here"
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              mt="md"
-              style={{ height: "100px" }}
-            />
-
-            {/* Forward and Cancel Buttons */}
-            <Group position="right" mt="md">
-              <Button
-                variant="light"
-                color="blue"
-                onClick={handleSubmitForward}
-              >
-                Forward File
-              </Button>
-              <Button variant="subtle" color="gray" onClick={handleBack}>
-                Cancel
-              </Button>
-            </Group>
-          </Box>
         </div>
       ) : (
         <Box
@@ -268,25 +169,41 @@ export default function Outboxfunc() {
           >
             <thead>
               <tr style={{ backgroundColor: "#0000" }}>
-                <th
-                  style={{
-                    padding: "12px",
-                    width: "8%",
-                    border: "1px solid #ddd",
-                  }}
-                >
-                  Forward
-                </th>
-
-                <th style={{ padding: "12px", border: "1px solid #ddd" }}>
-                  File ID
-                </th>
-                <th style={{ padding: "12px", border: "1px solid #ddd" }}>
-                  Subject
-                </th>
-                <th style={{ padding: "12px", border: "1px solid #ddd" }}>
-                  Date
-                </th>
+                {[
+                  { key: "id", label: "File ID" },
+                  { key: "uploader", label: "Uploader" },
+                  { key: "sent_to", label: "Sent to" },
+                  {
+                    key: "receiver_designation",
+                    label: "Receiver's Designation",
+                  },
+                  { key: "subject", label: "Subject" },
+                  { key: "upload_date", label: "Date" },
+                ].map(({ key, label }) => (
+                  <th
+                    key={key}
+                    onClick={() => handleSort(key)}
+                    style={{
+                      cursor: "pointer",
+                      padding: "12px",
+                      width: "15.5%",
+                      border: "1px solid #0000",
+                      alignItems: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    {label}
+                    {sortConfig.key === key ? (
+                      sortConfig.direction === "asc" ? (
+                        <CaretUp size={16} />
+                      ) : (
+                        <CaretDown size={16} />
+                      )
+                    ) : (
+                      <ArrowsDownUp size={16} opacity={0.6} />
+                    )}
+                  </th>
+                ))}
                 <th
                   style={{
                     padding: "12px",
@@ -299,37 +216,8 @@ export default function Outboxfunc() {
               </tr>
             </thead>
             <tbody>
-              {files.map((file, index) => (
+              {filteredFiles.map((file, index) => (
                 <tr key={index}>
-                  <td
-                    style={{
-                      padding: "8px",
-                      textAlign: "center",
-                      border: "1px solid #ddd",
-                    }}
-                  >
-                    <Tooltip label="Forward" position="top" withArrow>
-                      <ActionIcon
-                        variant="light"
-                        color="blue"
-                        style={{
-                          transition: "background-color 0.3s",
-                          width: "2rem",
-                          height: "2rem",
-                        }}
-                        onClick={() => handleForwardFile(file)} // Set the file to forward
-                        onMouseEnter={(e) => {
-                          e.target.style.backgroundColor = "#ffebee";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.backgroundColor = "transparent";
-                        }}
-                      >
-                        <ArrowArcRight size="1rem" />
-                      </ActionIcon>
-                    </Tooltip>
-                  </td>
-
                   <td
                     style={{
                       padding: "12px",
@@ -337,7 +225,38 @@ export default function Outboxfunc() {
                       textAlign: "center",
                     }}
                   >
-                    {file.id}
+                    {file.branch}-{new Date(file.upload_date).getFullYear()}-
+                    {(new Date(file.upload_date).getMonth() + 1)
+                      .toString()
+                      .padStart(2, "0")}
+                    -#{file.id}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    {file.uploader}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    {file.receiver}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    {file.receiver_designation}
                   </td>
                   <td
                     style={{

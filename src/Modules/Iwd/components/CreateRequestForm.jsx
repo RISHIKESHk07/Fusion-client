@@ -1,4 +1,4 @@
-import React, { useState, useContext, useMemo } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import {
   Button,
@@ -8,7 +8,6 @@ import {
   Paper,
   Title,
   Textarea,
-  Select,
   Center,
   CheckIcon,
   TextInput,
@@ -16,22 +15,22 @@ import {
 import { useForm } from "@mantine/form";
 import PropTypes from "prop-types";
 import classes from "../iwd.module.css";
-import { DesignationsContext } from "../helper/designationContext";
+// import { DesignationsContext } from "../helper/designationContext";
 import { HandleRequest } from "../handlers/handlers";
 
 function CreateRequest({ setActiveTab }) {
   const role = useSelector((state) => state.user.role);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const designations = useContext(DesignationsContext);
-  const designationsList = useMemo(
-    () =>
-      designations.map(
-        (designation) =>
-          `${designation.designation.name}|${designation.username}`,
-      ),
-    [designations],
-  );
+  // const designations = useContext(DesignationsContext);
+  // const designationsList = useMemo(
+  //   () =>
+  //     designations.map(
+  //       (designation) =>
+  //         `${designation.designation.name}|${designation.username}`,
+  //     ),
+  //   [designations],
+  // );
 
   const form = useForm({
     mode: "uncontrolled",
@@ -39,7 +38,7 @@ function CreateRequest({ setActiveTab }) {
       name: null,
       description: null,
       area: null,
-      designation: null,
+      designation: "Admin IWD|kunal",
     },
     validate: {
       name: (value) => (value ? null : "Field is required"),
@@ -48,19 +47,17 @@ function CreateRequest({ setActiveTab }) {
       designation: (value) => (value ? null : "Field is required"),
     },
   });
-
   return (
     /* eslint-disable react/jsx-props-no-spreading */
 
     <Grid mt="md">
       <div
-        className="container"
+        className="contains"
         style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          position: "absolute",
-          left: "25%",
+          maxWidth: "100vw",
+          width: "100vw",
+          margin: "0 auto",
+          padding: "1rem",
         }}
       >
         <form
@@ -78,17 +75,14 @@ function CreateRequest({ setActiveTab }) {
           <Paper
             radius="md"
             px="lg"
-            // pt="sm"
             pb="xl"
             style={{
               borderLeft: "0.6rem solid #15ABFF",
-              width: "60vw",
               minHeight: "45vh",
               maxHeight: "70vh",
               boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.15)",
             }}
             withBorder
-            maw="1240px"
             backgroundColor="white"
           >
             <Flex
@@ -97,12 +91,7 @@ function CreateRequest({ setActiveTab }) {
               style={{ textAlign: "left", width: "100%", fontFamily: "Arial" }}
             >
               <Flex direction="column">
-                <Title
-                  size="26px"
-                  weight={700}
-                  pt="sm"
-                  // style={{ textAlign: "center" }}
-                >
+                <Title size="26px" weight={700} pt="sm">
                   New Request
                 </Title>
               </Flex>
@@ -143,7 +132,7 @@ function CreateRequest({ setActiveTab }) {
                 />
               </Flex>
 
-              <Flex direction="column" gap="xs" justify="flex-start">
+              {/* <Flex direction="column" gap="xs" justify="flex-start">
                 <Select
                   mt="md"
                   comboboxProps={{ withinPortal: true }}
@@ -155,7 +144,7 @@ function CreateRequest({ setActiveTab }) {
                   {...form.getInputProps("designation")}
                   required
                 />
-              </Flex>
+              </Flex> */}
 
               <Flex gap="xs">
                 <Button

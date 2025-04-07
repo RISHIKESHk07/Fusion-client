@@ -4,12 +4,13 @@ import {
   Flex,
   Grid,
   Loader,
-  Paper,
   Title,
   Center,
   CheckIcon,
   TextInput,
   NumberInput,
+  createTheme,
+  MantineProvider,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import PropTypes from "prop-types";
@@ -17,14 +18,14 @@ import { DateInput } from "@mantine/dates";
 import classes from "./EngineerIssueWorkOrder.module.css";
 import { HandleIssueWorkOrder } from "../handlers/handlers";
 
-function IssueWorkOrderForm({ workOrder, onBack }) {
+function IssueWorkOrderForm({ workOrder, onBack, submitter }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
-      request_id: workOrder.id,
+      request_id: workOrder.request_id,
       name: workOrder.name,
       amount: null,
       deposit: null,
@@ -39,41 +40,48 @@ function IssueWorkOrderForm({ workOrder, onBack }) {
       alloted_time: (value) => (value ? null : "Field is required"),
     },
   });
+  const theme = createTheme({
+    breakpoints: {
+      xs: "30em",
+      sm: "48em",
+      md: "64em",
+      lg: "74em",
+      xl: "90em",
+      xxl: "300em",
+    },
+  });
 
   return (
     /* eslint-disable react/jsx-props-no-spreading */
-    <Grid mt="s">
-      <div className="contain">
-        <form
-          onSubmit={form.onSubmit((data) => {
-            HandleIssueWorkOrder({
-              data,
-              setIsLoading,
-              setIsSuccess,
-              onBack,
-            });
-          })}
+    <MantineProvider theme={theme}>
+      <Grid mt="s">
+        <div
+          style={{
+            maxWidth: "1240px",
+            width: "100%",
+            margin: "0 auto",
+            padding: "1rem",
+            boxSizing: "border-box",
+          }}
         >
-          <Paper
-            radius="md"
-            px="lg"
-            pt="sm"
-            pb="xl"
-            style={{
-              borderLeft: "0.6rem solid #15ABFF",
-              width: "60vw",
-              minHeight: "45vh",
-              maxHeight: "70vh",
-              marginBottom: "10px",
-            }}
-            withBorder
-            maw="1240px"
-            backgroundColor="white"
+          <form
+            onSubmit={form.onSubmit((data) => {
+              HandleIssueWorkOrder({
+                data,
+                setIsLoading,
+                setIsSuccess,
+                submitter,
+              });
+            })}
           >
             <Flex
               direction="column"
               gap="lg"
-              style={{ textAlign: "left", width: "100%", fontFamily: "Arial" }}
+              style={{
+                textAlign: "left",
+                width: "100%",
+                fontFamily: "Arial",
+              }}
             >
               <Flex direction="column">
                 <Title size="26px">Issue Work Order</Title>
@@ -161,7 +169,6 @@ function IssueWorkOrderForm({ workOrder, onBack }) {
                   <Flex direction="column" gap="xs">
                     <NumberInput
                       label="Amount"
-                      description=""
                       placeholder="Enter amount"
                       classNames={classes}
                       key={form.key("amount")}
@@ -197,26 +204,6 @@ function IssueWorkOrderForm({ workOrder, onBack }) {
               <Grid columns="1" style={{ width: "100%" }}>
                 <Grid.Col span={1}>
                   <Flex direction="column" gap="xs">
-                    {/* <DateInput
-                      label="Start Date"
-                      placeholder="yyyy/mm/dd"
-                      classNames={classes}
-                      key={form.key("start_date")}
-                      {...form.getInputProps("start_date")}
-                      valueFormat="YYYY-MM-DD"
-                      styles={{
-                        dropdown: {
-                          width: "100px",
-                          maxHeight: "150px",
-                          overflow: "auto",
-                        },
-                        calendar: {
-                          fontSize: "14px",
-                          width: "100px",
-                        },
-                      }}
-                      required
-                    /> */}
                     <DateInput
                       label="Start Date"
                       placeholder="yyyy/mm/dd"
@@ -235,7 +222,7 @@ function IssueWorkOrderForm({ workOrder, onBack }) {
                           fontWeight: "bold",
                         },
                         calendarHeaderIcon: {
-                          color: "#1E90FF",
+                          color: "#00796b",
                           fontSize: "20px",
                           fontWeight: "bold",
                         },
@@ -318,25 +305,40 @@ function IssueWorkOrderForm({ workOrder, onBack }) {
                     "Submit"
                   )}
                 </Button>
+                <Button
+                  size="sm"
+                  variant="light"
+                  color="gray"
+                  style={{
+                    width: "100px",
+                    backgroundColor: "#1E90FF",
+                    color: isSuccess ? "black" : "white",
+                    border: "none",
+                    borderRadius: "20px",
+                  }}
+                  onClick={onBack}
+                >
+                  Back
+                </Button>
               </Flex>
             </Flex>
-          </Paper>
-        </form>
-      </div>
-    </Grid>
-    /* eslint-enable react/jsx-props-no-spreading */
+          </form>
+        </div>
+      </Grid>
+    </MantineProvider>
   );
 }
 
 IssueWorkOrderForm.propTypes = {
   workOrder: PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    request_id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     description: PropTypes.string,
     area: PropTypes.string,
     "created-by": PropTypes.string,
   }).isRequired,
   onBack: PropTypes.func.isRequired,
+  submitter: PropTypes.func.isRequired,
 };
 
 export default IssueWorkOrderForm;

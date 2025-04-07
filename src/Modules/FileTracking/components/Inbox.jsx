@@ -1,8 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { Box, Card, Title, Table, ActionIcon, Tooltip } from "@mantine/core";
-import { Archive, Eye } from "@phosphor-icons/react";
+import {
+  Box,
+  Card,
+  Title,
+  Table,
+  ActionIcon,
+  Tooltip,
+  TextInput,
+  Group,
+  Modal,
+  Text,
+  Button,
+} from "@mantine/core";
+import {
+  Archive,
+  Eye,
+  CaretUp,
+  CaretDown,
+  ArrowsDownUp,
+} from "@phosphor-icons/react";
 import axios from "axios";
 import { useSelector } from "react-redux";
+import { notifications } from "@mantine/notifications";
 import View from "./ViewFile";
 import {
   getFilesRoute,
@@ -15,8 +34,14 @@ export default function Inboxfunc() {
   const token = localStorage.getItem("authToken");
   const role = useSelector((state) => state.user.role);
   const username = useSelector((state) => state.user.roll_no);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [searchQuery, setSearchQuery] = useState("");
   let current_module = useSelector((state) => state.module.current_module);
   current_module = current_module.split(" ").join("").toLowerCase();
+
+  // New state for archive confirmation modal
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [selectedArchiveFile, setSelectedArchiveFile] = useState(null);
 
   // Helper function to convert dates
   const convertDate = (date) => {
@@ -39,8 +64,8 @@ export default function Inboxfunc() {
             Authorization: `Token ${token}`,
           },
         });
+        console.log("Inbox: ", response.data);
         setFiles(response.data);
-        console.log(response.data);
       } catch (err) {
         console.error("Error fetching files:", err);
       }
@@ -49,7 +74,6 @@ export default function Inboxfunc() {
     getFiles();
   }, [username, role, current_module, token]);
 
-  // Archive file handler
   const handleArchive = async (fileID) => {
     try {
       await axios.post(
@@ -64,19 +88,53 @@ export default function Inboxfunc() {
           withCredentials: true,
           headers: {
             Authorization: `Token ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         },
       );
-      // Remove archived file from the list
       const updatedFiles = files.filter((file) => file.id !== fileID);
       setFiles(updatedFiles);
-    } catch (error) {
-      console.error("Error archiving file:", error);
+      notifications.show({
+        title: "File archived",
+        message: "The file has been successfully archived",
+        color: "green",
+      });
+    } catch (err) {
+      console.error("Error archiving file:", err);
     }
   };
 
   const handleBack = () => {
     setSelectedFile(null);
+  };
+  const sortedFiles = [...files].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    const direction = sortConfig.direction === "asc" ? 1 : -1;
+    return a[sortConfig.key] > b[sortConfig.key] ? direction : -direction;
+  });
+
+  const filteredFiles = sortedFiles.filter((file) => {
+    const idString = `${file.branch}-${new Date(file.upload_date).getFullYear()}-
+                      ${(new Date(file.upload_date).getMonth() + 1)
+                        .toString()
+                        .padStart(2, "0")}
+                      -#${file.id}`;
+    return (
+      file.uploader.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.sent_by_user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      idString.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      convertDate(file.upload_date)
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      file.sent_by_designation.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
   };
 
   // Using e.currentTarget ensures the style is applied to the ActionIcon element
@@ -89,253 +147,306 @@ export default function Inboxfunc() {
       e.currentTarget.dataset.defaultColor;
   };
 
+  // Archive modal functions
+  const openArchiveModal = (file) => {
+    setSelectedArchiveFile(file);
+    setShowArchiveModal(true);
+  };
+
+  const confirmArchive = () => {
+    if (selectedArchiveFile) {
+      handleArchive(selectedArchiveFile.id);
+      setShowArchiveModal(false);
+      setSelectedArchiveFile(null);
+    }
+  };
+
   return (
-    <>
-      {/* Embedded Responsive CSS */}
-      <style>{`
-        .inbox-card {
-          background-color: #f5f7f8;
-          max-width: 100%;
-          padding: 1rem;
-          overflow-x: hidden;
-        }
-        
-        .main-title {
-          font-size: 24px;
-        }
-        
-        .view-title {
-          font-size: 26px;
-          text-align: center;
-        }
-        
-        .files-container {
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          overflow-y: scroll;
-          height: 100vh;
-          background-color: #fff;
-        }
-        
-        .table-scroll-wrapper {
-          min-width: 300px;
-        }
-        
-        .files-table {
-          width: 100%;
-          border-collapse: collapse;
-          table-layout: fixed;
-          font-size: 14px;
-          text-align: center;
-        }
-        
-        .files-table th {
-          padding: 12px;
-          border: 1px solid #ddd;
-          background-color: #f8f9fa;
-          text-align: center;
-          min-width: 100px;
-        }
-        
-        .files-table td {
-          padding: 12px;
-          border: 1px solid #ddd;
-          text-align: center;
-          vertical-align: middle;
-        }
-        
-        .archive-icon,
-        .view-icon {
-          margin: 0 auto;
-          transition: background-color 0.3s;
-          width: 2rem;
-          height: 2rem;
-        }
-        
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-          .main-title {
-            font-size: 20px;
-          }
-          
-          .view-title {
-            font-size: 22px;
-          }
-          
-          .files-table {
-            display: block;
-            width: 100%;
-          }
-          
-          .files-table thead {
-            display: none;
-          }
-          
-          .files-table tbody,
-          .files-table tr,
-          .files-table td {
-            display: block;
-            width: 100%;
-          }
-          
-          .files-table tr {
-            margin-bottom: 1rem;
-            border: 2px solid #ddd;
-          }
-          
-          /* For textual data cells: align text to right with header labels */
-          .files-table td {
-            text-align: right;
-            padding-left: 50%;
-            position: relative;
-            border: none;
-            border-bottom: 1px solid #ddd;
-          }
-          
-          .files-table td::before {
-            content: attr(data-label);
-            position: absolute;
-            left: 0;
-            width: 45%;
-            padding-left: 1rem;
-            text-align: left;
-            font-weight: 600;
-          }
-          
-          /* For Archive and View File cells: do not display header labels and center the content */
-          .archive-cell::before,
-          .view-cell::before {
-            content: "";
-          }
-          .archive-cell,
-          .view-cell {
-            text-align: center !important;
-            padding-left: 0 !important;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .inbox-card {
-            padding: 0.5rem;
-          }
-          .files-table td {
-            padding: 8px;
-            padding-left: 50%;
-            font-size: 0.875rem;
-          }
-        }
-      `}</style>
-
-      <Card
-        shadow="sm"
-        padding="lg"
-        radius="md"
-        withBorder
-        className="inbox-card"
-        style={{
-          backgroundColor: "#F5F7F8",
-          position: "absolute",
-          height: "70vh",
-          width: "90vw",
-          overflowY: "auto",
-        }}
-      >
-        {!selectedFile && (
-          <Title order={2} mb="md" className="main-title">
-            Inbox
-          </Title>
-        )}
-
-        {selectedFile ? (
-          <div>
-            <Title order={3} mb="md" className="view-title">
-              File Subject
-            </Title>
-            <View
-              onBack={handleBack}
-              fileID={selectedFile.id}
-              updateFiles={() =>
-                setFiles(files.filter((f) => f.id !== selectedFile.id))
-              }
-            />
-          </div>
-        ) : (
-          <Box
-            className="files-container"
+    <Card
+      shadow="sm"
+      padding="lg"
+      radius="md"
+      withBorder
+      style={{
+        backgroundColor: "#F5F7F8",
+        position: "absolute",
+        height: "70vh",
+        width: "90vw",
+        overflowY: "auto",
+      }}
+    >
+      {!selectedFile && (
+        <Group position="apart" mb="md">
+          <Title
+            order={2}
+            mb="md"
             style={{
-              border: "1px solid #ddd",
-              borderRadius: "8px",
-              overflowY: "scroll",
-              height: "57vh",
-              backgroundColor: "#fff",
+              fontSize: "24px",
             }}
           >
-            <div className="table-scroll-wrapper">
-              <Table className="files-table" highlightOnHover>
-                <thead>
-                  <tr>
-                    {/* In responsive view, leave header labels empty for Archive and View File */}
-                    <th data-label="">Archive</th>
-                    <th data-label="Sent By">Sent By</th>
-                    <th data-label="File ID">File ID</th>
-                    <th data-label="Subject">Subject</th>
-                    <th data-label="Date">Date</th>
-                    <th data-label="">View File</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {files.map((file, index) => (
-                    <tr key={index}>
-                      <td className="archive-cell" data-label="">
-                        <Tooltip label="Archive file" position="top" withArrow>
-                          <ActionIcon
-                            variant="light"
-                            color="blue"
-                            className="archive-icon"
-                            data-default-color="transparent"
-                            data-hover-color="#ffebee"
-                            onMouseEnter={handleMouseEnter}
-                            onMouseLeave={handleMouseLeave}
-                            onClick={() => handleArchive(file.id)}
-                          >
-                            <Archive size="1rem" />
-                          </ActionIcon>
-                        </Tooltip>
-                      </td>
-                      <td className="uploader-cell" data-label="Sent By">
-                        {file.uploader}
-                      </td>
-                      <td className="file-cell" data-label="File ID">
-                        {file.id}
-                      </td>
-                      <td className="subject-cell" data-label="Subject">
-                        {file.subject}
-                      </td>
-                      <td className="date-cell" data-label="Date">
-                        {convertDate(file.upload_date)}
-                      </td>
-                      <td className="view-cell" data-label="">
-                        <ActionIcon
-                          variant="outline"
-                          color="black"
-                          className="view-icon"
-                          data-default-color="white"
-                          data-hover-color="#e0e0e0"
-                          onMouseEnter={handleMouseEnter}
-                          onMouseLeave={handleMouseLeave}
-                          onClick={() => setSelectedFile(file)}
-                        >
-                          <Eye size="1rem" />
-                        </ActionIcon>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-          </Box>
+            Inbox
+          </Title>
+          <TextInput
+            placeholder="Search files..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ marginBottom: "10px", marginLeft: "auto" }}
+          />
+        </Group>
+      )}
+
+      {selectedFile ? (
+        <div>
+          <Title
+            order={3}
+            mb="md"
+            style={{
+              fontSize: "26px",
+            }}
+          >
+            File Subject
+          </Title>
+          <View
+            onBack={handleBack}
+            fileID={selectedFile.id}
+            updateFiles={() =>
+              setFiles(files.filter((f) => f.id !== selectedFile.id))
+            }
+          />
+        </div>
+      ) : (
+        <Box
+          style={{
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            overflowY: "auto",
+            height: "56vh",
+            backgroundColor: "#fff",
+          }}
+        >
+          <Table
+            highlightOnHover
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              tableLayout: "fixed",
+              fontSize: "14px",
+            }}
+          >
+            <thead>
+              <tr style={{ backgroundColor: "#0000" }}>
+                <th data-label="">Archive</th>
+                {[
+                  "File ID",
+                  "Uploader",
+                  "Sent By",
+                  "Sender's Designation",
+                  "Subject",
+                  "Date",
+                ].map((key) => (
+                  <th
+                    key={key}
+                    onClick={() => handleSort(key)}
+                    style={{
+                      padding: "12px",
+                      width: "15.5%",
+                      border: "1px solid #ddd",
+                      cursor: "pointer",
+                      display: "align-items",
+                      alignItems: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                    {sortConfig.key === key ? (
+                      sortConfig.direction === "asc" ? (
+                        <CaretUp size={16} />
+                      ) : (
+                        <CaretDown size={16} />
+                      )
+                    ) : (
+                      <ArrowsDownUp size={16} opacity={0.6} />
+                    )}
+                  </th>
+                ))}
+                <th
+                  style={{
+                    padding: "12px",
+                    width: "8.5%",
+                    border: "1px solid ##ddd",
+                  }}
+                >
+                  View File
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredFiles.map((file, index) => (
+                <tr key={index}>
+                  <td
+                    style={{
+                      padding: "12px",
+                      textAlign: "center",
+                      border: "1px solid #ddd",
+                    }}
+                  >
+                    <Tooltip label="Archive file" position="top" withArrow>
+                      <ActionIcon
+                        variant="light"
+                        color="blue"
+                        className="archive-icon"
+                        data-default-color="transparent"
+                        data-hover-color="#ffebee"
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                        onClick={() => openArchiveModal(file)}
+                        disabled={file.uploader !== username} // only the original uploader can archive the file.
+                      >
+                        <Archive size="1.5rem" />
+                      </ActionIcon>
+                    </Tooltip>
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    {file.branch}-{new Date(file.upload_date).getFullYear()}-
+                    {(new Date(file.upload_date).getMonth() + 1)
+                      .toString()
+                      .padStart(2, "0")}
+                    -#{file.id}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                    data-label="Sent By"
+                  >
+                    {file.uploader}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                    data-label="Sent By"
+                  >
+                    {file.sent_by_user}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                    data-label="Sent By"
+                  >
+                    {file.sent_by_designation}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    {file.subject}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    {convertDate(file.upload_date)}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                    data-label=""
+                  >
+                    <Tooltip label="View File" position="top" withArrow>
+                      <ActionIcon
+                        variant="light"
+                        color="black"
+                        style={{
+                          transition: "background-color 0.3s",
+                          width: "2rem",
+                          height: "2rem",
+                        }}
+                        onClick={() => setSelectedFile(file)}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = "#E3F2FD";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = "transparent";
+                        }}
+                      >
+                        <Eye size="1rem" />
+                      </ActionIcon>
+                    </Tooltip>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Box>
+      )}
+      {/* Archive Confirmation Modal */}
+      <Modal
+        opened={showArchiveModal}
+        onClose={() => setShowArchiveModal(false)}
+        title={
+          <Text align="center" weight={600} size="lg">
+            Confirm Archive
+          </Text>
+        }
+        centered
+      >
+        <Text weight={600} mb="md">
+          Are you sure you want to archive this file?
+        </Text>
+        {selectedArchiveFile && (
+          <>
+            <Text mb="ls">Subject: {selectedArchiveFile.subject}</Text>
+            <Text mb="md">
+              File ID: {selectedArchiveFile.branch}-
+              {new Date(selectedArchiveFile.upload_date).getFullYear()}-
+              {(new Date(selectedArchiveFile.upload_date).getMonth() + 1)
+                .toString()
+                .padStart(2, "0")}
+              -#{selectedArchiveFile.id}
+            </Text>
+          </>
         )}
-      </Card>
-    </>
+        <Group justify="center" gap="xl" style={{ width: "100%" }}>
+          <Button
+            onClick={confirmArchive}
+            color="blue"
+            style={{ width: "120px" }}
+          >
+            Confirm
+          </Button>
+          <Button
+            onClick={() => setShowArchiveModal(false)}
+            variant="outline"
+            style={{ width: "120px" }}
+          >
+            Cancel
+          </Button>
+        </Group>
+      </Modal>
+    </Card>
   );
 }

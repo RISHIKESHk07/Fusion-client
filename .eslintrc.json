@@ -51,7 +51,8 @@
       {
         "endOfLine": "auto"
       }
-    ]
+    ],
+    "jsx-a11y/label-has-associated-control": "off"
   },
   "settings": {
     "react": {

@@ -43,7 +43,24 @@ export default function ViewBudget() {
         </Grid>
       ) : (
         // <Paper className="s-table" shadow="xs">
-        <div className="details-wrapper">
+        <div
+          className="details-wrapper"
+          style={{
+            border: "1px solid #ccc",
+            // borderRadius: "25px", // commented on the same day to fix the UI
+            padding: "20px",
+            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.15)",
+            borderLeft: "10px solid #1E90FF",
+            // new changes 4/3/2025 lab
+            width: "80vw",
+            // position: "absolute",
+            // right: "200px",
+            position: "absolute",
+            right: "10vw",
+            overflow: "auto",
+            margin: "0 auto",
+          }}
+        >
           <Title align="center" weight={700} size="26px" mb="md">
             Details
           </Title>

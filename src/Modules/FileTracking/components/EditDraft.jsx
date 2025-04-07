@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable prettier/prettier */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Title,
@@ -10,55 +10,146 @@ import {
   Textarea,
   Box,
   Select,
+  Grid,
+  Autocomplete,
+  Group,
 } from "@mantine/core";
 import { ArrowLeft, Upload } from "@phosphor-icons/react";
 import { notifications } from "@mantine/notifications";
+import axios from "axios";
+import { useSelector } from "react-redux";
+import { Trash } from "phosphor-react";
+import {
+  createFileRoute,
+  designationsRoute,
+  getUsernameRoute,
+} from "../../../routes/filetrackingRoutes";
+import { host } from "../../../routes/globalRoutes";
 
 // eslint-disable-next-line react/prop-types
-function ViewDraft({ file, onBack }) {
+export default function EditDraft({ file, onBack, deleteDraft }) {
   // Initialize state with data from the draft (file prop)
-  const [title, setTitle] = useState(file.subject || "");
-  const [description, setDescription] = useState(file.description || "");
-  const [attachedFile, setAttachedFile] = useState(file.attachedFile || null);
-  const [receiver, setReceiver] = useState(file.receiver || "");
-  const [designation, setDesignation] = useState(file.designation || "");
-  const [create, setCreateas] = useState(file.create || "");
 
-  const handleSaveChanges = () => {
-    notifications.show({
-      title: "File Saved",
-      message: "Changes have been saved.",
-      color: "blue",
-    });
-    const updatedDraft = {
-      title,
-      description,
-      attachedFile,
-      receiver,
-      designation,
-      create,
+  const [receiver_designations, setReceiverDesignations] = useState("");
+  const [usernameSuggestions, setUsernameSuggestions] = useState([]);
+  const [title, setTitle] = useState(file.file_extra_JSON.subject || "");
+  // eslint-disable-next-line no-unused-vars
+  const [subject, setSubject] = useState(file.file_extra_JSON.subject || "");
+  const [description, setDescription] = useState(
+    file.file_extra_JSON.description || "",
+  );
+  const [remarks, setRemarks] = useState(file.file_extra_JSON.remarks);
+  const [attachedFile, setAttachedFile] = useState([]);
+  const token = localStorage.getItem("authToken");
+  const [receiver_username, setReceiverUsername] = useState("");
+  const [receiver_designation, setReceiverDesignation] = useState("");
+  let module = useSelector((state) => state.module.current_module);
+  module = module.split(" ").join("").toLowerCase();
+  const uploaderRole = useSelector((state) => state.user.role);
+  // eslint-disable-next-line no-unused-vars
+  const [designation, setDesignation] = useState(uploaderRole);
+  const receiverRoles = Array.isArray(receiver_designations)
+    ? receiver_designations.map((role) => ({
+        value: role,
+        label: role,
+      }))
+    : [];
+  useEffect(() => {
+    setAttachedFile(file.upload_file);
+  }, [file]);
+  const removeFile = () => {
+    setAttachedFile(null);
+  };
+  const handleFileChange = (uploadedFile) => {
+    setAttachedFile(uploadedFile); // only one file allowed here as it is already associated with one fileID.
+  };
+  useEffect(() => {
+    let isMounted = true;
+    const getUsernameSuggestion = async () => {
+      try {
+        const response = await axios.post(
+          `${getUsernameRoute}`,
+          { value: receiver_username },
+          {
+            headers: { Authorization: `Token ${token}` },
+          },
+        );
+        const users = JSON.parse(response.data.users);
+        // Ensure response.data.users is an array before mapping
+        if (response.data && Array.isArray(users)) {
+          const suggestedUsernames = users.map((user) => user.fields.username);
+          if (isMounted) {
+            setUsernameSuggestions(suggestedUsernames);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching username suggestion:", error);
+      }
     };
 
-    // Implement the save functionality here (e.g., saving to local storage, API, etc.)
-    console.log("Changes saved:", updatedDraft);
-    onBack();
-  };
+    if (receiver_username) {
+      getUsernameSuggestion();
+    }
 
-  const handleSend = () => {
-    const draftToSend = {
-      title,
-      description,
-      attachedFile,
-      receiver,
-      designation,
-      create,
+    return () => {
+      isMounted = false; // Cleanup to prevent memory leaks
     };
-
-    // Implement the send functionality here (e.g., API call to send the draft)
-    console.log("Draft sent:", draftToSend);
-    onBack(); // Navigate back after sending
+  }, [receiver_username, token]);
+  const files = [attachedFile];
+  const handleCreateFile = async () => {
+    try {
+      const formData = new FormData();
+      files.forEach((fileItem, index) => {
+        const fileAttachment =
+          fileItem instanceof File
+            ? fileItem
+            : new File([fileItem], `uploaded_file_${index}`, {
+                type: "application/octet-stream",
+              });
+        formData.append("files", fileAttachment); // Append each file
+      });
+      formData.append("subject", subject);
+      formData.append("description", description);
+      formData.append("designation", designation);
+      formData.append("receiver_username", receiver_username);
+      formData.append("receiver_designation", receiver_designation);
+      formData.append("src_module", module);
+      const response = await axios.post(`${createFileRoute}`, formData, {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      });
+      if (response.status === 201) {
+        notifications.show({
+          title: "File sent successfully",
+          message: "The file has been sent successfully.",
+          color: "green",
+          position: "top-center",
+        });
+        deleteDraft(file.id);
+        onBack();
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
-
+  const fetchRoles = async () => {
+    const response = await axios.get(
+      `${designationsRoute}${receiver_username}`,
+      {
+        headers: {
+          Authorization: `Token ${token}`,
+        },
+      },
+    );
+    console.log(response);
+    setReceiverDesignations(response.data.designations);
+  };
+  useEffect(() => {
+    if (receiver_username) {
+      fetchRoles();
+    }
+  }, [receiver_username]);
   return (
     <Card
       // shadow="sm" padding="lg" radius="md" withBorder
@@ -97,6 +188,7 @@ function ViewDraft({ file, onBack }) {
       <TextInput
         label="Title"
         placeholder="Enter Title"
+        value={title}
         onChange={(e) => setTitle(e.currentTarget.value)}
         mb="sm"
       />
@@ -107,72 +199,89 @@ function ViewDraft({ file, onBack }) {
         onChange={(e) => setDescription(e.currentTarget.value)}
         mb="sm"
       />
-      <TextInput
-        label="Create as"
-        placeholder="Enter creation type"
-        onChange={(e) => setCreateas(e.currentTarget.value)}
-        mb="sm"
-      />
-
       <FileInput
         label="Attach file (PDF, JPG, PNG) (MAX: 10MB)"
-        placeholder={attachedFile ? attachedFile.name : "Upload file"}
         accept="application/pdf,image/jpeg,image/png"
         icon={<Upload size={16} />}
+        placeholder={attachedFile}
         value={attachedFile}
-        onChange={setAttachedFile}
+        onChange={handleFileChange}
         mb="sm"
         withAsterisk
       />
-
-      <Textarea label="Remark" placeholder="Enter remark" mb="sm" />
-
-      <TextInput
-        label="Forward To"
-        placeholder="Enter forward recipient"
-        value={receiver}
-        onChange={(e) => setReceiver(e.currentTarget.value)}
+      {attachedFile && (
+        <Group position="apart" mt="sm">
+          <Button
+            leftIcon={<Trash size={16} />}
+            color="green"
+            onClick={() => window.open(`${host}${attachedFile}`, "_blank")}
+            compact
+          >
+            Download File
+          </Button>
+          <Button
+            leftIcon={<Trash size={16} />}
+            color="red"
+            onClick={removeFile}
+            compact
+          >
+            Remove File
+          </Button>
+        </Group>
+      )}
+      <Textarea
+        label="Remark"
+        placeholder="Enter remark"
         mb="sm"
+        value={remarks}
+        onChange={(e) => setRemarks(e.currentTarget.value)}
       />
-
-      <Select
-        label="Receiver Designation"
-        placeholder="Select designation"
-        data={[
-          { value: "Professor", label: "Professor" },
-          { value: "Student", label: "Student" },
-          { value: "Employee", label: "Employee" },
-        ]}
-        value={designation}
-        onChange={setDesignation}
-        mb="sm"
-      />
-
+      <Grid mb="sm" gutter="sm">
+        <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Autocomplete
+            label="Send To"
+            placeholder="Enter recipient"
+            value={receiver_username}
+            data={usernameSuggestions} // Pass the array of suggestions
+            onChange={(value) => {
+              setReceiverDesignation("");
+              setReceiverUsername(value);
+            }}
+          />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Select
+            label="Receiver Designation"
+            placeholder="Select designation"
+            onClick={() => {
+              if (receiverRoles.length === 0) {
+                fetchRoles();
+              }
+            }}
+            value={receiver_designation} // Use receiver_designation (string)
+            data={receiverRoles} // Ensure this is populated correctly
+            onChange={(value) => setReceiverDesignation(value)}
+            searchable // Allows searching for designations
+            nothingFound="No designations found"
+          />
+        </Grid.Col>
+      </Grid>
       <Box
         style={{
           display: "flex",
-          justifyContent: "flex-start",
-          gap: "10px",
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: "auto", // Push button to the bottom
         }}
       >
         <Button
-          onClick={handleSaveChanges}
           style={{
-            width: "12%",
-            marginRight: "10px",
-            marginLeft: "25px",
+            width: "200px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
           }}
-        >
-          Save Changes
-        </Button>
-
-        <Button
-          onClick={handleSend}
-          style={{
-            width: "10%",
-            marginRight: "10px",
-            marginLeft: "70%",
-          }}
+          onClick={handleCreateFile}
         >
           Send
         </Button>
@@ -180,5 +289,3 @@ function ViewDraft({ file, onBack }) {
     </Card>
   );
 }
-
-export default ViewDraft;

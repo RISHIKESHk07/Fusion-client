@@ -13,6 +13,7 @@ import {
   Group,
   Autocomplete,
   Grid,
+  Modal,
 } from "@mantine/core";
 import { Upload, FloppyDisk, Trash } from "@phosphor-icons/react";
 import { notifications } from "@mantine/notifications";
@@ -26,7 +27,7 @@ import {
 } from "../../../routes/filetrackingRoutes";
 
 axios.defaults.withCredentials = true;
-// eslint-disable-next-line no-unused-vars
+
 export default function Compose() {
   const [files, setFiles] = React.useState(null);
   const [usernameSuggestions, setUsernameSuggestions] = React.useState([]);
@@ -35,7 +36,9 @@ export default function Compose() {
   const [receiver_designations, setReceiverDesignations] = React.useState("");
   const [subject, setSubject] = React.useState("");
   const [description, setDescription] = React.useState("");
+  const [remarks, setRemarks] = React.useState("");
   const token = localStorage.getItem("authToken");
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
   const roles = useSelector((state) => state.user.roles);
   let module = useSelector((state) => state.module.current_module);
@@ -65,11 +68,11 @@ export default function Compose() {
     setReceiverUsername("");
     setSubject("");
     setDescription("");
+    setRemarks("");
   };
   useEffect(() => {
     setDesignation(roles);
-    console.log(receiverRoles);
-  }, [roles, receiverRoles]);
+  }, [roles]);
 
   useEffect(() => {
     let isMounted = true;
@@ -83,10 +86,8 @@ export default function Compose() {
           },
         );
         const users = JSON.parse(response.data.users);
-        // Ensure response.data.users is an array before mapping
         if (response.data && Array.isArray(users)) {
           const suggestedUsernames = users.map((user) => user.fields.username);
-          console.log(suggestedUsernames);
           if (isMounted) {
             setUsernameSuggestions(suggestedUsernames);
           }
@@ -101,41 +102,43 @@ export default function Compose() {
     }
 
     return () => {
-      isMounted = false; // Cleanup to prevent memory leaks
+      isMounted = false;
     };
   }, [receiver_username, token]);
 
   const fetchRoles = async () => {
-    const response = await axios.get(
-      `${designationsRoute}${receiver_username}`,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
+    try {
+      const response = await axios.get(
+        `${designationsRoute}${receiver_username}`,
+        {
+          headers: {
+            Authorization: `Token ${token}`,
+          },
         },
-      },
-    );
-    console.log(response);
-    setReceiverDesignations(response.data.designations);
-  };
-  useEffect(() => {
-    if (receiver_username) {
-      fetchRoles();
+      );
+      console.log(response);
+      setReceiverDesignations(response.data.designations);
+    } catch (err) {
+      if (err.response && err.response.status === 500) {
+        console.warn("Retrying fetchRoles in 2 seconds...");
+        setTimeout(fetchRoles, 2000);
+      }
     }
-  }, [receiver_username]);
+  };
   const handleSaveDraft = async () => {
     try {
-      console.log(uploaderRole);
-      console.log(module);
-      console.log(typeof files);
       const formData = new FormData();
       formData.append("designation", uploaderRole);
       formData.append("src_module", module);
-
+      formData.append("subject", subject);
+      formData.append("description", description);
+      formData.append("remarks", remarks);
+      formData.append("receiver_username", receiver_username);
+      formData.append("receiver_designation", receiver_designation);
       files.forEach((file) => {
-        formData.append("files", file); // `files` should be an array of File objects
+        formData.append("files", file);
       });
-      // eslint-disable-next-line no-unused-vars
-      const response = await axios.post(`${createDraftRoute}`, formData, {
+      await axios.post(`${createDraftRoute}`, formData, {
         headers: {
           Authorization: `Token ${token}`,
         },
@@ -152,19 +155,28 @@ export default function Compose() {
     }
   };
 
-  // postSubmit();
-  const handleCreateFile = async () => {
-    if (!files) {
+  const handleCreateFile = () => {
+    if (
+      !files ||
+      !subject ||
+      !description ||
+      !receiver_username ||
+      !receiver_designation
+    ) {
       notifications.show({
-        title: "Error",
-        message: "Please upload a file",
+        title: "Incomplete Form",
+        message: "Please fill out all required fields before submitting.",
         color: "red",
         position: "top-center",
       });
-      // eslint-disable-next-line no-useless-return
       return;
     }
 
+    setShowConfirmModal(true);
+  };
+
+  const finalSubmit = async () => {
+    setShowConfirmModal(false);
     try {
       const formData = new FormData();
       files.forEach((fileItem, index) => {
@@ -174,7 +186,7 @@ export default function Compose() {
             : new File([fileItem], `uploaded_file_${index}`, {
                 type: "application/octet-stream",
               });
-        formData.append("files", fileAttachment); // Append each file
+        formData.append("files", fileAttachment);
       });
       formData.append("subject", subject);
       formData.append("description", description);
@@ -273,6 +285,14 @@ export default function Compose() {
           onChange={(e) => setDescription(e.target.value)}
           required
         />
+        <Textarea
+          label="Remarks"
+          placeholder="Enter remarks"
+          mb="sm"
+          value={remarks}
+          onChange={(e) => setRemarks(e.target.value)}
+          required
+        />
         <Select
           label="Designation"
           placeholder="Sender's Designation"
@@ -286,11 +306,11 @@ export default function Compose() {
           placeholder="Upload file"
           accept="application/pdf,image/jpeg,image/png"
           icon={<Upload size={16} />}
-          value={files} // Set the file state as the value
-          onChange={handleFileChange} // Update file state on change
+          value={files}
+          onChange={handleFileChange}
           mb="sm"
-          withAsterisk
           multiple
+          maxSize={10 * 1024 * 1024}
         />
         {files && (
           <Group position="apart" mt="sm">
@@ -307,10 +327,10 @@ export default function Compose() {
         <Grid mb="sm" gutter="sm">
           <Grid.Col span={{ base: 12, sm: 6 }}>
             <Autocomplete
-              label="Forward To"
-              placeholder="Enter forward recipient"
+              label="Send To"
+              placeholder="Enter recipient"
               value={receiver_username}
-              data={usernameSuggestions} // Pass the array of suggestions
+              data={usernameSuggestions}
               onChange={(value) => {
                 setReceiverDesignation("");
                 setReceiverUsername(value);
@@ -326,10 +346,10 @@ export default function Compose() {
                   fetchRoles();
                 }
               }}
-              value={receiver_designation} // Use receiver_designation (string)
-              data={receiverRoles} // Ensure this is populated correctly
+              value={receiver_designation}
+              data={receiverRoles}
               onChange={(value) => setReceiverDesignation(value)}
-              searchable // Allows searching for designations
+              searchable
               nothingFound="No designations found"
             />
           </Grid.Col>
@@ -347,6 +367,37 @@ export default function Compose() {
           Submit
         </Button>
       </Box>
+
+      <Modal
+        opened={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title={
+          <Text align="center" weight={600} size="lg">
+            Confirm Submission
+          </Text>
+        }
+        centered
+      >
+        <Text weight={600} mb="ls">
+          Do you want to send this file?
+        </Text>
+        <Text mb="ls">Sender: ({designation})</Text>
+        <Text mb="md">
+          Receiver: {receiver_username} ({receiver_designation})
+        </Text>
+        <Group justify="center" gap="xl" style={{ width: "100%" }}>
+          <Button
+            onClick={() => setShowConfirmModal(false)}
+            variant="outline"
+            style={{ width: "120px" }}
+          >
+            Cancel
+          </Button>
+          <Button onClick={finalSubmit} color="blue" style={{ width: "120px" }}>
+            Confirm
+          </Button>
+        </Group>
+      </Modal>
     </Card>
   );
 }

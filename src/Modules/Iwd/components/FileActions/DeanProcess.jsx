@@ -66,6 +66,8 @@ function DeanProcess({ form, request, handleBackToList }) {
             key={form.key("designation")}
             {...form.getInputProps("designation")}
             required
+            searchable
+            clearable
           />
         </Flex>
       </Flex>
