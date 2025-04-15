@@ -23,7 +23,10 @@ function ApplyForSpecialFood() {
   const [toDate, setToDate] = useState(null);
   const [purpose, setPurpose] = useState("");
   const authToken = localStorage.getItem("authToken");
-  console.log(authToken);
+  const today = new Date();
+  const minstartdate = new Date();
+  minstartdate.setDate(today.getDate() + 3);
+  // console.log(authToken);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -109,6 +112,7 @@ function ApplyForSpecialFood() {
               label="From"
               placeholder="Select start date"
               value={fromDate}
+              minDate={minstartdate}
               onChange={setFromDate}
               icon={<Calendar />}
               required
@@ -118,6 +122,7 @@ function ApplyForSpecialFood() {
               label="To"
               placeholder="Select end date"
               value={toDate}
+              minDate={fromDate}
               onChange={setToDate}
               icon={<Calendar />}
               required

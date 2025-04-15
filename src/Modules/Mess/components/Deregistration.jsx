@@ -16,6 +16,7 @@ import { deregistrationRequestRoute } from "../routes";
 function Deregistration() {
   const roll_no = useSelector((state) => state.user.roll_no);
   const [endDate, setEndDate] = useState(null);
+  const today = new Date();
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -76,6 +77,9 @@ function Deregistration() {
             be deregistered from the mess on the date which you fill, and you
             can't eat on that day. Thus, advised to fill the next day instead of
             today.
+            <br />
+            <br />
+            ** You can only deregister from the start of the next month.
           </Text>
 
           <form onSubmit={handleSubmit}>
@@ -84,6 +88,7 @@ function Deregistration() {
                 label="End Date*"
                 placeholder="dd-mm-yyyy"
                 value={endDate}
+                minDate={new Date(today.getFullYear(), today.getMonth() + 1, 1)}
                 onChange={setEndDate}
                 required
                 radius="md"
@@ -107,19 +112,6 @@ function Deregistration() {
                 })}
                 mb="lg"
               />
-              {/* <DatePicker
-                label="End Date*"
-                placeholder="dd-mm-yyyy"
-                value={endDate}
-                onChange={setEndDate}
-                required
-                radius="md"
-                size="sm"
-                labelProps={{ style: { marginBottom: "10px" } }}
-                inputFormat="DD-MM-YYYY"
-                dateFormat="DD-MM-YYYY"
-                style={{ width: "60%" }}
-              /> */}
               <Button
                 size="md"
                 radius="md"

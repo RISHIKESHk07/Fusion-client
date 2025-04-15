@@ -20,7 +20,7 @@ function BDesStudView() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("info");
   const isMobile = useMediaQuery("(max-width: 768px)");
-  
+
   // States for filtering
   const [searchName, setSearchName] = useState("");
   const [searchVersion, setSearchVersion] = useState("");
@@ -74,7 +74,7 @@ function BDesStudView() {
     ? curriculumData.working_curriculums.filter(
         (curr) =>
           curr.name.toLowerCase().includes(searchName.toLowerCase()) &&
-          curr.version.toLowerCase().includes(searchVersion.toLowerCase())
+          curr.version.toLowerCase().includes(searchVersion.toLowerCase()),
       )
     : [];
 
@@ -83,7 +83,7 @@ function BDesStudView() {
     ? curriculumData.past_curriculums.filter(
         (curr) =>
           curr.name.toLowerCase().includes(searchName.toLowerCase()) &&
-          curr.version.toLowerCase().includes(searchVersion.toLowerCase())
+          curr.version.toLowerCase().includes(searchVersion.toLowerCase()),
       )
     : [];
 
@@ -172,7 +172,9 @@ function BDesStudView() {
               Programme Begin Year
             </td>
             <td style={{ padding: "20px 20px", backgroundColor: "#FFFFFF" }}>
-              {curriculumData.program ? curriculumData.program.programme_begin_year : ""}
+              {curriculumData.program
+                ? curriculumData.program.programme_begin_year
+                : ""}
             </td>
           </tr>
         </tbody>
@@ -294,20 +296,18 @@ function BDesStudView() {
                     borderRight: "1px solid #d3d3d3",
                   }}
                 >
-                  {curr.batches ? (
-                    curr.batches.map((b, i) => (
-                      <React.Fragment key={i}>
-                        <span style={{ marginRight: "10px" }}>
-                          {`${b.name} ${b.year}`}
-                        </span>
-                        {i < curr.batches.length - 1 && (
-                          <span style={{ margin: "0 10px" }}>|</span>
-                        )}
-                      </React.Fragment>
-                    ))
-                  ) : (
-                    `${batchName} ${curr.year}`
-                  )}
+                  {curr.batches
+                    ? curr.batches.map((b, i) => (
+                        <React.Fragment key={i}>
+                          <span style={{ marginRight: "10px" }}>
+                            {`${b.name} ${b.year}`}
+                          </span>
+                          {i < curr.batches.length - 1 && (
+                            <span style={{ margin: "0 10px" }}>|</span>
+                          )}
+                        </React.Fragment>
+                      ))
+                    : `${batchName} ${curr.year}`}
                 </td>
                 <td
                   style={{
@@ -476,7 +476,6 @@ function BDesStudView() {
   const renderFilterSection = () => (
     <ScrollArea>
       <div>
-        
         <TextInput
           label="Name:"
           value={searchName}

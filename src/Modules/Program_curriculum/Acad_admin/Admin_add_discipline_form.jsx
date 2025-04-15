@@ -79,7 +79,7 @@ function Admin_add_discipline_form() {
       setLoading(true);
       const response = await fetch(apiUrl, {
         method: "POST",
-        headers:{
+        headers: {
           Authorization: `Token ${token}`,
         },
         body: JSON.stringify(payload),

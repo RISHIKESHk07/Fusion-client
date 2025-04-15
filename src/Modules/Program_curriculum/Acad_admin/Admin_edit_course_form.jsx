@@ -98,9 +98,15 @@ function Admin_edit_course_form() {
           practicalHours: data.pratical_hours,
           discussionHours: data.discussion_hours,
           projectHours: data.project_hours,
-          discipline: data.disciplines.length>0?data.disciplines.map((d) => JSON.stringify(d)):[],
+          discipline:
+            data.disciplines.length > 0
+              ? data.disciplines.map((d) => JSON.stringify(d))
+              : [],
           preRequisites: data.pre_requisits,
-          preRequisiteCourse: data.pre_requisit_courses.length>0?data.pre_requisit_courses.map((c) => JSON.stringify(c)):[],
+          preRequisiteCourse:
+            data.pre_requisit_courses.length > 0
+              ? data.pre_requisit_courses.map((c) => JSON.stringify(c))
+              : [],
           syllabus: data.syllabus,
           references: data.ref_books,
           quiz1: data.percent_quiz_1,
@@ -179,8 +185,6 @@ function Admin_edit_course_form() {
     <div
       style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
     >
-     
-
       <Container
         fluid
         style={{

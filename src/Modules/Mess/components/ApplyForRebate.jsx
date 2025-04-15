@@ -18,6 +18,9 @@ function RebateApplication() {
   const [rebateFromDate, setRebateFromDate] = useState(null);
   const [rebateToDate, setRebateToDate] = useState(null);
   const [purpose, setPurpose] = useState("");
+  const today = new Date();
+  const minstartdate = new Date();
+  minstartdate.setDate(today.getDate() + 3);
 
   const formatDate = (date) =>
     date ? new Date(date).toISOString().split("T")[0] : "";
@@ -80,6 +83,7 @@ function RebateApplication() {
               <DateInput
                 label="Rebate From"
                 placeholder="MM/DD/YYYY"
+                minDate={minstartdate}
                 value={rebateFromDate}
                 onChange={setRebateFromDate}
                 required
@@ -93,6 +97,7 @@ function RebateApplication() {
               <DateInput
                 label="Rebate To"
                 placeholder="MM/DD/YYYY"
+                minDate={rebateFromDate}
                 value={rebateToDate}
                 onChange={setRebateToDate}
                 required

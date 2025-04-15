@@ -43,9 +43,9 @@ function SidebarContent({ isCollapsed, toggleSidebar }) {
   const role = useSelector((state) => state.user.role);
 
   const deployedModules = [
-    "home",
-    "fts",
     "complaint_management",
+    "fts",
+    "home",
     "mess_management",
     "visitor_hostel",
     "hostel_management",

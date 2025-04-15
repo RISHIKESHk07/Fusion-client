@@ -13,7 +13,7 @@ import {
   Select,
   ScrollArea, // Import ScrollArea from Mantine
 } from "@mantine/core";
-import { registrationRequestRoute } from "../routes";
+import { viewRegistrationRequestsRoute } from "../routes";
 
 const tableHeaders = [
   "Student ID",
@@ -42,7 +42,7 @@ function ViewRegistration() {
           return;
         }
 
-        const response = await axios.get(registrationRequestRoute, {
+        const response = await axios.get(viewRegistrationRequestsRoute, {
           headers: { Authorization: `Token ${token}` },
         });
 
@@ -81,9 +81,13 @@ function ViewRegistration() {
         mess_option: item.mess_option,
       };
 
-      const response = await axios.put(registrationRequestRoute, updatedData, {
-        headers: { Authorization: `Token ${token}` },
-      });
+      const response = await axios.put(
+        viewRegistrationRequestsRoute,
+        updatedData,
+        {
+          headers: { Authorization: `Token ${token}` },
+        },
+      );
 
       if (response.status === 200) {
         setRegistrationData((prevData) =>
@@ -91,7 +95,8 @@ function ViewRegistration() {
         );
       }
     } catch (errors) {
-      setError("Failed to update registration status.");
+      window.alert("Update the mess option before accepting.");
+      // setError("Failed to update registration status.");
     }
   };
 
@@ -192,6 +197,7 @@ function ViewRegistration() {
                               { value: "mess1", label: "M1" },
                               { value: "mess2", label: "M2" },
                             ]}
+                            required
                             value={item.mess_option || ""}
                             onChange={(value) =>
                               handleMessOptionChange(item.id, value)

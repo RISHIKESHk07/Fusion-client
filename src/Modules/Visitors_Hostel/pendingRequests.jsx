@@ -11,29 +11,26 @@ import {
 } from "@mantine/core";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
-// eslint-disable-next-line import/no-unresolved
 import { FaEye } from "react-icons/fa"; // Import the eye icon
 import CombinedBookingForm from "./bookingForm";
+import ForwardBookingForm from "./forwardBooking";
+import ConfirmBookingIn from "./confirmBooking_Incharge";
 import ViewBooking from "./viewBooking"; // Import the new ViewBooking component
 import { fetchBookingsRoute } from "../../routes/visitorsHostelRoutes";
 
-function BookingsRequestTable({ bookings }) {
+function BookingsRequestTable({ bookings, onBookingForward }) {
   const [modalOpened, setModalOpened] = useState(false); // State to control modal
-  // const [forwardModalOpened, setForwardModalOpened] = useState(null); // State to control forward modal for each booking
+  const [forwardModalOpened, setForwardModalOpened] = useState(null); // State to control forward modal for each booking
   const [viewModalOpened, setViewModalOpened] = useState(null); // State to control view modal for each booking
   const [searchTerm, setSearchTerm] = useState(""); // State to store the search term
 
-  // const handleForwardButtonClick = (bookingId) => {
-  //   setForwardModalOpened(bookingId); // Open modal for the specific booking
-  // };
+  const handleForwardButtonClick = (bookingId) => {
+    setForwardModalOpened(bookingId); // Open modal for the specific booking
+  };
 
-  // const handleForwardCloseModal = () => {
-  //   setForwardModalOpened(null); // Close modal
-  //   onBookingForward(); // Call the fetch function to refresh bookings when closing the modal
-  // };
-
-  const handleButtonClick = () => {
-    setModalOpened(true); // Open modal when "Place Request" is clicked
+  const handleForwardCloseModal = () => {
+    setForwardModalOpened(null); // Close modal
+    onBookingForward(); // Call the fetch function to refresh bookings when closing the modal
   };
 
   const handleCloseModal = () => {
@@ -51,14 +48,11 @@ function BookingsRequestTable({ bookings }) {
   const role = useSelector((state) => state.user.role);
 
   // Filter bookings based on role and status
-  const filteredBookings = bookings.filter(() => {
-    if (role === "VhIncharge") {
-      return true;
+  const filteredBookings = bookings.filter((booking) => {
+    if (role === "VhIncharge" || role === "VhCaretaker") {
+      return booking.status === "Pending";
     }
-    if (role === "VhCaretaker") {
-      return true;
-    }
-    return true;
+    return booking.status === "Pending";
   });
 
   // Filter bookings based on search term
@@ -97,13 +91,9 @@ function BookingsRequestTable({ bookings }) {
               color: "#228be6",
             }}
           >
-            Booking Requests
+            Pending Requests
           </Text>
         </Box>
-
-        <Button variant="outline" color="red" onClick={handleButtonClick}>
-          Place Request
-        </Button>
       </Box>
 
       <TextInput
@@ -200,7 +190,7 @@ function BookingsRequestTable({ bookings }) {
                   }}
                 >
                   {booking.modifiedCategory}
-                  {/* {console.log("BOOKING: ", booking)} */}
+                  {console.log("BOOKING: ", booking)}
                 </td>
                 {role === "VhIncharge" ? (
                   <td
@@ -220,7 +210,7 @@ function BookingsRequestTable({ bookings }) {
                     textAlign: "center",
                   }}
                 >
-                  {/* {role === "VhCaretaker" && booking.status === "Pending" ? (
+                  {role === "VhCaretaker" && booking.status === "Pending" ? (
                     <>
                       <Button
                         variant="outline"
@@ -256,40 +246,39 @@ function BookingsRequestTable({ bookings }) {
                         />
                       )}
                     </>
-                  ) : ( */}
-                  <Badge
-                    color={
-                      booking.status === "Pending"
-                        ? "gray"
-                        : booking.status === "Confirmed" ||
-                            booking.status === "Complete"
-                          ? "green"
-                          : "red"
-                    }
-                    variant="light"
-                    style={{
-                      backgroundColor:
+                  ) : (
+                    <Badge
+                      color={
                         booking.status === "Pending"
-                          ? "#E0E0E0"
+                          ? "gray"
                           : booking.status === "Confirmed" ||
                               booking.status === "Complete"
-                            ? "#dffbe0"
-                            : "#f8d7da",
-                      color:
-                        booking.status === "Pending"
-                          ? "#757575"
-                          : booking.status === "Confirmed" ||
-                              booking.status === "Complete"
-                            ? "#84b28c"
-                            : "#721c24",
-                      padding: "4px 8px",
-                      borderRadius: "4px",
-                    }}
-                  >
-                    {booking.status}
-                  </Badge>
-                  {/* )
-                  } */}
+                            ? "green"
+                            : "red"
+                      }
+                      variant="light"
+                      style={{
+                        backgroundColor:
+                          booking.status === "Pending"
+                            ? "#E0E0E0"
+                            : booking.status === "Confirmed" ||
+                                booking.status === "Complete"
+                              ? "#dffbe0"
+                              : "#f8d7da",
+                        color:
+                          booking.status === "Pending"
+                            ? "#757575"
+                            : booking.status === "Confirmed" ||
+                                booking.status === "Complete"
+                              ? "#84b28c"
+                              : "#721c24",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      {booking.status}
+                    </Badge>
+                  )}
                 </td>
                 <td
                   style={{
@@ -336,10 +325,10 @@ BookingsRequestTable.propTypes = {
       status: PropTypes.string.isRequired,
     }),
   ).isRequired,
-  // onBookingForward: PropTypes.func.isRequired, // Add this line for validation
+  onBookingForward: PropTypes.func.isRequired, // Add this line for validation
 };
 
-function Bookings() {
+function PendingReqs() {
   const [bookings, setBookings] = useState([]);
 
   const fetchBookings = async () => {
@@ -396,4 +385,4 @@ function Bookings() {
   );
 }
 
-export default Bookings;
+export default PendingReqs;

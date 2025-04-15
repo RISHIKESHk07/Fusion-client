@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
 import { fetchAllCourses, fetchFacultiesData } from "../api/api";
 import { host } from "../../../routes/globalRoutes";
 
@@ -84,7 +84,7 @@ function Admin_add_course_instructor() {
   const handleSubmit = async (values) => {
     console.log(values);
     const token = localStorage.getItem("authToken");
-  
+
     const apiUrl = `${host}/programme_curriculum/api/admin_add_course_instructor/`;
 
     const payload = {
@@ -98,7 +98,10 @@ function Admin_add_course_instructor() {
     try {
       const response = await fetch(apiUrl, {
         method: "POST",
-        headers: { Authorization: `Token ${token}`,"Content-Type": "application/json", },
+        headers: {
+          Authorization: `Token ${token}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       });
 
@@ -121,22 +124,22 @@ function Admin_add_course_instructor() {
       alert("Please choose a file to upload.");
       return;
     }
-  
+
     // Validate file type
     if (!file.name.match(/\.(xls|xlsx)$/i)) {
       alert("Only Excel files (.xls, .xlsx) are allowed.");
       return;
     }
-  
+
     setIsUploading(true);
     const token = localStorage.getItem("authToken");
     const apiUrl = `${host}/programme_curriculum/api/admin_add_course_instructor/`;
-    
+
     try {
       const formData = new FormData();
       formData.append("manual_instructor_xsl", file);
       formData.append("excel_submit", "true");
-  
+
       const response = await fetch(apiUrl, {
         method: "POST",
         body: formData,
@@ -144,7 +147,7 @@ function Admin_add_course_instructor() {
           Authorization: `Token ${token}`, // Required for Django CSRF
         },
       });
-  
+
       const data = await response.json();
       if (response.ok) {
         alert(data.success || "File processed successfully!");
@@ -154,7 +157,6 @@ function Admin_add_course_instructor() {
         throw new Error(data.error || "Upload failed");
       }
 
-  
       setUploadedFile(file);
     } catch (error) {
       alert(`Error: ${error.message}`);
@@ -313,21 +315,29 @@ function Admin_add_course_instructor() {
                           textOverflow: "ellipsis",
                         }}
                       />
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => {
                           const sampleData = [
-                            ['Course Code', 'Course Version','Instructor Id', 'Year', 'Semester no'],
-                            ['NS205i', '1', 'amitv', '2023', '5'],
-                            ['CS3010', '1', 'atul', '2023', '5'],
+                            [
+                              "Course Code",
+                              "Course Version",
+                              "Instructor Id",
+                              "Year",
+                              "Semester no",
+                            ],
+                            ["NS205i", "1", "amitv", "2023", "5"],
+                            ["CS3010", "1", "atul", "2023", "5"],
                           ];
-                          
+
                           const ws = XLSX.utils.aoa_to_sheet(sampleData);
                           const wb = XLSX.utils.book_new();
                           XLSX.utils.book_append_sheet(wb, ws, "Instructors");
-                          XLSX.writeFile(wb, 'instructors_sample.xls', { bookType: 'biff8' });
+                          XLSX.writeFile(wb, "instructors_sample.xls", {
+                            bookType: "biff8",
+                          });
                         }}
-                        style={{ marginTop: '24px' }}
+                        style={{ marginTop: "24px" }}
                       >
                         Download Sample
                       </Button>
@@ -342,16 +352,14 @@ function Admin_add_course_instructor() {
                         Cancel
                       </Button>
 
-                    
-                        <Button
-                          onClick={handleUpload}
-                          variant="filled"
-                          color="blue"
-                          disabled={isUploading || !file}
-                        >
-                          {isUploading ? "Uploading..." : "Upload"}
-                        </Button>
-              
+                      <Button
+                        onClick={handleUpload}
+                        variant="filled"
+                        color="blue"
+                        disabled={isUploading || !file}
+                      >
+                        {isUploading ? "Uploading..." : "Upload"}
+                      </Button>
                     </Group>
                   </>
                 )}

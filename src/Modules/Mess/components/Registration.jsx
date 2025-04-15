@@ -13,6 +13,7 @@ import {
 } from "@mantine/core";
 import { useSelector } from "react-redux";
 import { DateInput } from "@mantine/dates";
+import { notifications } from "@mantine/notifications";
 import axios from "axios";
 import { FunnelSimple } from "@phosphor-icons/react";
 import { registrationRequestRoute } from "../routes";
@@ -27,13 +28,20 @@ function Registration() {
   const [error, setError] = useState(null);
   const [messOption, setMessOption] = useState("");
   const [remark, setRemark] = useState("");
+  const today = new Date();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const token = localStorage.getItem("authToken");
     if (!token) {
-      setError("Authentication token not found.");
+      const msg = "Authentication token not found.";
+      setError(msg);
+      notifications.show({
+        title: "Error",
+        message: msg,
+        color: "red",
+      });
       return;
     }
 
@@ -64,12 +72,34 @@ function Registration() {
       });
 
       if (response.status === 200) {
-        console.log("Form submitted successfully", response.data);
+        // console.log("Form submitted successfully", response.data);
         setError(null);
+        // notifications.show({
+        //   title: "Success",
+        //   message: "Form submitted successfully!",
+        //   color: "green",
+        // });
+        window.alert("form submitted successfully");
+        // Reset form fields
+        setTxnNo("");
+        setAmount(0);
+        setFile(null);
+        setPaymentDate(null);
+        setStartDate(null);
+        setMessOption("");
+        setRemark("");
       }
     } catch (errors) {
-      setError("Error submitting the form. Please try again.");
-      console.error("Error:", errors.response?.data || errors.message);
+      const errorMessage =
+        errors.response?.data?.message ||
+        "Error submitting the form. Please try again.";
+      setError(errorMessage);
+      // notifications.show({
+      //   title: "Error",
+      //   message: errorMessage,
+      //   color: "red",
+      // });
+      window.alert("error occured");
     }
   };
 
@@ -150,6 +180,8 @@ function Registration() {
             placeholder="Select date"
             value={paymentDate}
             onChange={setPaymentDate}
+            maxDate={today}
+            onDayChange={(day) => setPaymentDate(day)}
             required
             radius="md"
             size="md"
@@ -161,6 +193,8 @@ function Registration() {
             label="Start Date"
             placeholder="Select date"
             value={startDate}
+            minDate={today}
+            // onChange={(day) => setStartDate(day)}
             onChange={setStartDate}
             required
             radius="md"

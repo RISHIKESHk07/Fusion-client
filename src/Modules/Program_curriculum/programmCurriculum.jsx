@@ -116,15 +116,14 @@ export default function ProgrammeCurriculumRoutes() {
 
   // Determine which navigation tabs to show based on role
   const NavTab = () => {
-    const TabComponent = 
-      STUDENT_ROLES.includes(role)
-        ? BreadcrumbTabs
-        : FACULTY_ROLES.includes(role)
-          ? BreadcrumbTabsFaculty
-          : ADMIN_ROLES.includes(role)
-            ? BreadcrumbTabsAcadadmin
-            : () => null;
-    
+    const TabComponent = STUDENT_ROLES.includes(role)
+      ? BreadcrumbTabs
+      : FACULTY_ROLES.includes(role)
+        ? BreadcrumbTabsFaculty
+        : ADMIN_ROLES.includes(role)
+          ? BreadcrumbTabsAcadadmin
+          : () => null;
+
     return (
       <>
         <Breadcrumb />
@@ -342,7 +341,7 @@ export default function ProgrammeCurriculumRoutes() {
           element={
             <ProtectedRoute allowedRoles={FACULTY_ROLES}>
               <Layout>
-              <NavTab />
+                <NavTab />
                 <ViewInwardFile />
               </Layout>
             </ProtectedRoute>
@@ -375,7 +374,7 @@ export default function ProgrammeCurriculumRoutes() {
           element={
             <ProtectedRoute allowedRoles={FACULTY_ROLES}>
               <Layout>
-              <NavTab />
+                <NavTab />
                 <BDesView />
               </Layout>
             </ProtectedRoute>
@@ -731,7 +730,7 @@ export default function ProgrammeCurriculumRoutes() {
           element={
             <ProtectedRoute allowedRoles={FACULTY_ROLES}>
               <Layout>
-              <NavTab />
+                <NavTab />
                 <FacultyCourseProposalFinalForm />
               </Layout>
             </ProtectedRoute>

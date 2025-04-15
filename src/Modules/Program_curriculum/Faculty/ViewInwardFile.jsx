@@ -313,7 +313,8 @@ function ViewInward() {
               {/* <Group position="apart" style={{ marginTop: "10px" }}> */}
               <Text style={textStyle}>
                 {" "}
-                <b>Sent By:</b> {noteData.sentBy} - {noteData.designation}, {formatDateWithRounding(noteData.forwarddate)}
+                <b>Sent By:</b> {noteData.sentBy} - {noteData.designation},{" "}
+                {formatDateWithRounding(noteData.forwarddate)}
               </Text>
             </Box>
             <Box
@@ -386,7 +387,8 @@ function ViewInward() {
           <hr style={{ width: "80%" }} />
 
           <Text size="lg" padding="lg" className="course-title">
-            Course Proposal Form by - {noteData.createdBy} - {noteData.designation}
+            Course Proposal Form by - {noteData.createdBy} -{" "}
+            {noteData.designation}
           </Text>
 
           <Table className="course-table" striped highlightOnHover>
@@ -704,9 +706,7 @@ function ViewInward() {
                 <td style={{ color: "blue", fontWeight: "bold" }}>
                   References & Books
                 </td>
-                <td>
-                  {courseDetails.references}
-                </td>
+                <td>{courseDetails.references}</td>
               </tr>
             </tbody>
           </Table>

@@ -14,3 +14,5 @@ export const fetchIncomeDataRoute = `${host}/visitorhostel/accounts-income/`;
 export const addItemsRoute = `${host}/visitorhostel/api/inventory_add/`;
 export const fetchInventorydataRoute = `${host}/visitorhostel/api/inventory_list/`;
 export const fetchPartialBookingdataRoute = `${host}/visitorhostel/check-partial-booking/`;
+export const checkInBookingRoute = `${host}/visitorhostel/check-in/`;
+export const checkOutBookingRoute = `${host}/visitorhostel/check-out/`;

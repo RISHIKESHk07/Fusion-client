@@ -266,30 +266,40 @@ import {
   Select,
 } from "@mantine/core";
 import axios from "axios";
+import { FaEye } from "react-icons/fa"; // Import the eye icon
 import {
   cancelBookingRoute,
   getActiveBookingsRoute,
 } from "../../routes/visitorsHostelRoutes";
+import ViewBooking from "./viewActiveBooking"; // Import the new ViewActiveBooking component
 
-function BookingTable({ activeBooking, onCancel }) {
+function BookingTable({ activeBooking }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("bookingFrom");
+  const [viewModalOpened, setViewModalOpened] = useState(null); // State to control view modal for each booking
 
+  const handleViewBooking = (bookingId) => {
+    setViewModalOpened(bookingId); // Open modal for the specific booking
+  };
+  const handleViewCloseModal = () => {
+    setViewModalOpened(null); // Close modal
+  };
+
+  // Update the sorting logic
   const sortedBookings = activeBooking
-    .sort((a, b) => {
-      const valueA = a[sortField]?.toLowerCase?.() || "";
-      const valueB = b[sortField]?.toLowerCase?.() || "";
-      return valueA < valueB ? -1 : valueA > valueB ? 1 : 0;
-    })
     .filter((booking) => {
       return (
         booking.intender.toLowerCase().includes(searchTerm.toLowerCase()) ||
         booking.bookingFrom.toLowerCase().includes(searchTerm.toLowerCase()) ||
         booking.bookingTo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.category.toLowerCase().includes(searchTerm.toLowerCase())
+        booking.modifiedVisitorCategory
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
       );
-    });
+    })
+    .sort((a, b) => new Date(b.bookingFrom) - new Date(a.bookingFrom));
 
+  console.log("Sorted Bookings from Active Booking", sortedBookings);
   return (
     <Box p="md" style={{ margin: 10 }}>
       <Box
@@ -404,7 +414,7 @@ function BookingTable({ activeBooking, onCancel }) {
                     textAlign: "center",
                   }}
                 >
-                  {booking.category}
+                  {booking.modifiedVisitorCategory}
                 </td>
                 <td
                   style={{
@@ -413,13 +423,28 @@ function BookingTable({ activeBooking, onCancel }) {
                     textAlign: "center",
                   }}
                 >
-                  <Button
+                  {/* <Button
                     size="xs"
                     color="red"
                     onClick={() => onCancel(booking.id)}
                   >
                     Cancel
+                  </Button> */}
+                  <Button
+                    variant="outline"
+                    color="blue"
+                    onClick={() => handleViewBooking(booking.id)}
+                  >
+                    <FaEye />
                   </Button>
+                  {viewModalOpened === booking.id && (
+                    <ViewBooking
+                      modalOpened={viewModalOpened === booking.id}
+                      onClose={handleViewCloseModal}
+                      bookingId={booking.id}
+                      bookingf={booking}
+                    />
+                  )}
                 </td>
               </tr>
             ))}
@@ -439,9 +464,9 @@ BookingTable.propTypes = {
       bookingFrom: PropTypes.string.isRequired,
       bookingTo: PropTypes.string.isRequired,
       category: PropTypes.string.isRequired,
+      modifiedVisitorCategory: PropTypes.string.isRequired,
     }),
   ).isRequired,
-  onCancel: PropTypes.func.isRequired,
 };
 
 function ActiveBookings() {

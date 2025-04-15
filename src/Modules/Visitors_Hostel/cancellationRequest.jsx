@@ -6,7 +6,7 @@ import { fetchCancelledBookingsRoute } from "../../routes/visitorsHostelRoutes";
 
 function CancellationRequestTable({ bookings }) {
   const sortedBookings = bookings.sort(
-    (a, b) => new Date(a.bookingFrom) - new Date(b.bookingFrom),
+    (a, b) => new Date(b.bookingFrom) - new Date(a.bookingFrom),
   );
 
   return (
@@ -149,6 +149,7 @@ CancellationRequestTable.propTypes = {
       bookingFrom: PropTypes.string.isRequired,
       bookingTo: PropTypes.string.isRequired,
       category: PropTypes.string.isRequired,
+      modifiedCategory: PropTypes.string.isRequired,
       status: PropTypes.string.isRequired,
     }),
   ).isRequired,
@@ -168,6 +169,7 @@ function CancellationRequest() {
         const { data } = await axios.get(fetchCancelledBookingsRoute, {
           headers: { Authorization: `Token ${token}` },
         });
+        console.log("Cancelled Bookings: ", data.cancelled_bookings);
         setBookings(data.cancelled_bookings);
       } catch (error) {
         console.error("Error fetching cancelled bookings:", error);

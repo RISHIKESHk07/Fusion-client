@@ -24,6 +24,7 @@ function UpdateBalanceRequest() {
   const [paymentDate, setPaymentDate] = useState(null);
   const [transactionNo, setTransactionNo] = useState("");
   const [amount, setAmount] = useState(null);
+  const today = new Date();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -138,6 +139,7 @@ function UpdateBalanceRequest() {
           <DateInput
             label="Payment Date"
             placeholder="MM/DD/YYYY"
+            maxDate={today}
             value={paymentDate}
             onChange={setPaymentDate}
             required

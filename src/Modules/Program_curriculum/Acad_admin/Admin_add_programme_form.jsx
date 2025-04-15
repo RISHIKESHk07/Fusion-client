@@ -30,7 +30,7 @@ function Admin_add_programme_form() {
   const handleSubmit = async (values) => {
     const apiUrl = `${host}/programme_curriculum/api/admin_add_programme/`;
     const token = localStorage.getItem("token");
-    console.log(values)
+    console.log(values);
     try {
       setLoading(true);
       const response = await fetch(apiUrl, {
@@ -119,7 +119,9 @@ function Admin_add_programme_form() {
               <NumberInput
                 label="Programme Begin Year"
                 value={form.values.programme_begin_year}
-                onChange={(value) => form.setFieldValue("programme_begin_year", value)}
+                onChange={(value) =>
+                  form.setFieldValue("programme_begin_year", value)
+                }
                 required
               />
             </Stack>

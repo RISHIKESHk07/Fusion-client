@@ -16,11 +16,11 @@ const TabsModules = [
     id: "room-availability",
     url: "/visitors_hostel/room-availability",
   },
-  {
-    label: "Mess Record",
-    id: "mess-record",
-    url: "/visitors_hostel/mess-record",
-  },
+  // {
+  //   label: "Mess Record",
+  //   id: "mess-record",
+  //   url: "/visitors_hostel/mess-record",
+  // },
   { label: "Inventory", id: "inventory", url: "/visitors_hostel/inventory" },
   {
     label: "Account Statement",
@@ -39,6 +39,11 @@ const ManageBookingsTabs = [
     label: "Bookings",
     id: "bookings",
     url: "/visitors_hostel/",
+  },
+  {
+    label: "Pending Requests",
+    id: "pending-requests",
+    url: "/visitors_hostel/pending_requests",
   },
   {
     label: "Cancelled Requests",
