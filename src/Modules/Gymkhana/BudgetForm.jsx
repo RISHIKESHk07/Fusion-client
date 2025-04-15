@@ -28,6 +28,8 @@ function BudgetApprovalForm({
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [formPreviewData, setFormPreviewData] = useState(null);
 
   // Set up the form with initial values and validation
   const form = useForm({
@@ -176,9 +178,20 @@ function BudgetApprovalForm({
     }
   };
 
+  const confirmSubmission = () => {
+    setShowConfirmModal(false);
+    handleSubmit(formPreviewData);
+  };
+
   return (
     <Container>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="club-form">
+      <form
+        onSubmit={form.onSubmit((values) => {
+          setFormPreviewData(values);
+          setShowConfirmModal(true);
+        })}
+        className="club-form"
+      >
         <h2 className="club-header"> {clubName}'s Budget Proposal</h2>
         {/* Success Message */}
         {successMessage && (
@@ -269,6 +282,44 @@ function BudgetApprovalForm({
           </Button>
         </Group>
       </form>
+
+      <Modal
+        opened={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title="Confirm Budget Submission"
+      >
+        <Text>
+          <strong>Budget For:</strong> {formPreviewData?.budget_for}
+        </Text>
+        <Text>
+          <strong>Description:</strong> {formPreviewData?.description}
+        </Text>
+        <Text>
+          <strong>Requested Amount:</strong> ₹
+          {formPreviewData?.budget_requested}
+        </Text>
+        <Text>
+          <strong>Attached File:</strong>{" "}
+          {formPreviewData?.budget_file?.name || "No file"}
+        </Text>
+        <Text>
+          <strong>Remarks:</strong> {formPreviewData?.remarks}
+        </Text>
+
+        <Group position="apart" mt="md">
+          <Button color="green" onClick={confirmSubmission}>
+            Confirm
+          </Button>
+          <Button
+            color="red"
+            variant="outline"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            Cancel
+          </Button>
+        </Group>
+      </Modal>
+
       <Modal
         opened={isModalOpen}
         onClose={() => setIsModalOpen(false)}

@@ -30,6 +30,8 @@ function EventsApprovalForm({
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [formPreviewData, setFormPreviewData] = useState(null);
 
   const form = useForm({
     initialValues: initialValues || {
@@ -180,9 +182,20 @@ function EventsApprovalForm({
     }
   };
 
+  const confirmSubmission = () => {
+    setShowConfirmModal(false);
+    handleSubmit(formPreviewData);
+  };
+
   return (
     <Container>
-      <form onSubmit={form.onSubmit(handleSubmit)} className="club-form">
+      <form
+        onSubmit={form.onSubmit((values) => {
+          setFormPreviewData(values);
+          setShowConfirmModal(true);
+        })}
+        className="club-form"
+      >
         <h2 className="club-header">Apply for {clubName}'s Event !!!</h2>
         {successMessage && (
           <Alert title="Success" color="green" mt="md" className="club-message">
@@ -303,6 +316,52 @@ function EventsApprovalForm({
           </Button>
         </Group>
       </form>
+
+      <Modal
+        opened={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title="Confirm Event Submission"
+      >
+        <Text>
+          <strong>Event Name:</strong> {formPreviewData?.event_name}
+        </Text>
+        <Text>
+          <strong>Details:</strong> {formPreviewData?.details}
+        </Text>
+        <Text>
+          <strong>Venue:</strong> {formPreviewData?.venue}
+        </Text>
+        <Text>
+          <strong>Incharge:</strong> {formPreviewData?.incharge}
+        </Text>
+        <Text>
+          <strong>Start Date:</strong>{" "}
+          {dayjs(formPreviewData?.start_date).format("YYYY-MM-DD")}
+        </Text>
+        <Text>
+          <strong>End Date:</strong>{" "}
+          {dayjs(formPreviewData?.end_date).format("YYYY-MM-DD")}
+        </Text>
+        <Text>
+          <strong>Start Time:</strong> {formPreviewData?.start_time}
+        </Text>
+        <Text>
+          <strong>End Time:</strong> {formPreviewData?.end_time}
+        </Text>
+        <Group position="apart" mt="md">
+          <Button color="green" onClick={confirmSubmission}>
+            Confirm
+          </Button>
+          <Button
+            color="red"
+            variant="outline"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            Cancel
+          </Button>
+        </Group>
+      </Modal>
+
       <Modal
         opened={isModalOpen}
         onClose={() => setIsModalOpen(false)}
