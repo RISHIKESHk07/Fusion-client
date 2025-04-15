@@ -125,7 +125,10 @@ function EventReportForm({
   const form = useForm({
     initialValues: initialValues || {
       event: "",
-      description: "",
+      agenda: "", // Required
+      participants: "", // Optional
+      winners: "", // Optional
+      gallery_assets: "", // Optional
       venue: "",
       incharge: "",
       start_date: null,
@@ -133,7 +136,6 @@ function EventReportForm({
       start_time: "",
       end_time: "",
       event_budget: 0,
-      special_announcement: "",
       club: clubName,
     },
     validate: {
@@ -145,8 +147,7 @@ function EventReportForm({
         value.length === 0 ? "Start time cannot be empty" : null,
       end_time: (value) =>
         value.length === 0 ? "End time cannot be empty" : null,
-      description: (value) =>
-        value.length === 0 ? "Description cannot be empty" : null,
+      agenda: (value) => (value.length === 0 ? "Agenda cannot be empty" : null),
       start_date: (value) => (!value ? "Start date cannot be empty" : null),
       event_budget: (value) =>
         value <= 0 ? "Budget must be a positive number" : null,
@@ -162,6 +163,7 @@ function EventReportForm({
   );
 
   const handleSubmit = async (values) => {
+    console.log(values);
     if (editMode && onSubmit) {
       onSubmit(values);
       return;
@@ -216,15 +218,45 @@ function EventReportForm({
         />
 
         <TextInput
-          label="Description"
-          placeholder="Enter the event description"
-          value={form.values.description}
+          label="Agenda"
+          placeholder="Enter the agenda of the event"
+          value={form.values.agenda}
           onChange={(event) =>
-            form.setFieldValue("description", event.currentTarget.value)
+            form.setFieldValue("agenda", event.currentTarget.value)
           }
-          error={form.errors.description}
-          disabled={editMode && disabledFields.includes("description")}
+          error={form.errors.agenda}
+          disabled={editMode && disabledFields.includes("agenda")}
           withAsterisk
+        />
+
+        <TextInput
+          label="Participants"
+          placeholder="Enter the participants (optional)"
+          value={form.values.participants}
+          onChange={(event) =>
+            form.setFieldValue("participants", event.currentTarget.value)
+          }
+          disabled={editMode && disabledFields.includes("participants")}
+        />
+
+        <TextInput
+          label="Winners"
+          placeholder="Enter the winners (optional)"
+          value={form.values.winners}
+          onChange={(event) =>
+            form.setFieldValue("winners", event.currentTarget.value)
+          }
+          disabled={editMode && disabledFields.includes("winners")}
+        />
+
+        <TextInput
+          label="Gallery Assets"
+          placeholder="Enter links to images/videos (optional)"
+          value={form.values.gallery_assets}
+          onChange={(event) =>
+            form.setFieldValue("gallery_assets", event.currentTarget.value)
+          }
+          disabled={editMode && disabledFields.includes("gallery_assets")}
         />
         <TextInput
           label="Venue"
@@ -304,20 +336,6 @@ function EventReportForm({
           withAsterisk
           precision={2}
         />
-        <TextInput
-          label="Special Announcement"
-          placeholder="Enter the announcement"
-          value={form.values.special_announcement}
-          onChange={(event) =>
-            form.setFieldValue(
-              "special_announcement",
-              event.currentTarget.value,
-            )
-          }
-          error={form.errors.special_announcement}
-          disabled={editMode && disabledFields.includes("special_announcement")}
-          withAsterisk
-        />
 
         <TextInput label="Club Name" value={clubName} readOnly withAsterisk />
 
@@ -343,10 +361,31 @@ function EventReportForm({
 
 EventReportForm.propTypes = {
   clubName: PropTypes.string.isRequired,
-  initialValues: PropTypes,
+  initialValues: PropTypes.shape({
+    event: PropTypes.string,
+    agenda: PropTypes.string,
+    participants: PropTypes.string,
+    winners: PropTypes.string,
+    gallery_assets: PropTypes.string,
+    venue: PropTypes.string,
+    incharge: PropTypes.string,
+    start_date: PropTypes.instanceOf(Date),
+    end_date: PropTypes.instanceOf(Date),
+    start_time: PropTypes.string,
+    end_time: PropTypes.string,
+    event_budget: PropTypes.number,
+    club: PropTypes.string,
+  }),
   onSubmit: PropTypes.func,
   editMode: PropTypes.bool,
   disabledFields: PropTypes.arrayOf(PropTypes.string),
+};
+
+EventReportForm.defaultProps = {
+  initialValues: null,
+  onSubmit: null,
+  editMode: false,
+  disabledFields: [],
 };
 
 function ReportForm({ clubName }) {
