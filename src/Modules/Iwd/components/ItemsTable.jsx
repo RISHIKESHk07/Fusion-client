@@ -1,9 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
-  Paper,
   Table,
   Button,
+  Title,
   Text,
   Group,
   Stack,
@@ -14,47 +14,28 @@ import { host } from "../../../routes/globalRoutes";
 
 export default function ItemsTable({ setSelectedProposalId, proposaldata }) {
   const { itemsList, proposal } = proposaldata;
-
+  console.log("itemlist", itemsList);
   return (
-    <Paper
-      shadow="xl"
-      radius="md"
-      p="lg"
-      style={{
-        marginTop: "40px",
-        marginBottom: "40px",
-        background: "#ffffff",
-      }}
-    >
+    <>
       <Group position="apart" mb="xl" align="flex-end">
-        <Text fw={700} size="2xl" color="blue">
-          Proposal Information
-        </Text>
+        <Title>Proposal Information</Title>
       </Group>
       <Stack spacing="md" mb="lg">
         <Group position="apart">
-          <Text fw={600} color="blue">
-            ID:
-          </Text>
-          <Text>{proposal?.id || "N/A"}</Text>
+          <Title size="lg">ID:</Title>
+          <Text size="lg">{proposal?.id || "N/A"}</Text>
         </Group>
         <Group position="apart">
-          <Text fw={600} color="blue">
-            Created By:
-          </Text>
-          <Text>{proposal?.created_by || "N/A"}</Text>
+          <Title size="lg">Created By:</Title>
+          <Text size="lg">{proposal?.created_by || "N/A"}</Text>
         </Group>
         <Group position="apart">
-          <Text fw={600} color="blue">
-            Budget:
-          </Text>
+          <Title size="lg">Budget:</Title>
           <Text>{proposal?.proposal_budget || "N/A"}</Text>
         </Group>
         {proposal.supporting_documents && (
           <Group position="apart">
-            <Text fw={600} color="blue">
-              Docs:
-            </Text>
+            <Title size="lg">Docs:</Title>
             <Group spacing="xs">
               <Paperclip size="16" />
               <Button
@@ -80,36 +61,93 @@ export default function ItemsTable({ setSelectedProposalId, proposaldata }) {
         <Table highlightOnHover striped>
           <thead style={{ backgroundColor: "#f0f0f0" }}>
             <tr>
-              <th style={{ padding: "12px" }}>Item ID</th>
-              <th style={{ padding: "12px" }}>Name</th>
-              <th style={{ padding: "12px" }}>Description</th>
-              <th style={{ padding: "12px" }}>Unit</th>
-              <th style={{ padding: "12px" }}>Price/Unit</th>
-              <th style={{ padding: "12px" }}>Total</th>
-              <th style={{ padding: "12px" }}>Document</th>
+              <th>
+                <Title size="md">Item ID</Title>
+              </th>
+              <th>
+                <Title size="md">Name</Title>
+              </th>
+              <th>
+                <Title size="md">Description</Title>
+              </th>
+              <th>
+                <Title size="md">Unit</Title>
+              </th>
+              <th>
+                <Title size="md">Price/Unit</Title>
+              </th>
+              <th>
+                <Title size="md">Total</Title>
+              </th>
+              <th>
+                <Title size="md">Quantity</Title>
+              </th>
+              <th>
+                <Title size="md">Document</Title>
+              </th>
             </tr>
           </thead>
           <tbody>
             {itemsList.length > 0 ? (
               itemsList.map((item) => (
                 <tr key={item.id}>
-                  <td style={{ padding: "12px" }}>{item.id}</td>
-                  <td style={{ padding: "12px" }}>{item.name}</td>
-                  <td style={{ padding: "12px" }}>{item.description}</td>
-                  <td style={{ padding: "12px" }}>{item.unit}</td>
-                  <td style={{ padding: "12px" }}>{item.price_per_unit}</td>
-                  <td style={{ padding: "12px" }}>{item.total_price}</td>
-                  <td style={{ padding: "12px" }}>
-                    <Button
-                      size="xs"
-                      color="blue"
-                      onClick={() => window.open(item.docs, "_blank")}
-                      disabled={!item.docs}
-                      radius="xl"
-                      variant="outline"
-                    >
-                      View Docs
-                    </Button>
+                  <td>
+                    <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                      {item.id}
+                    </Text>
+                  </td>
+                  <td>
+                    <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                      {item.name}
+                    </Text>
+                  </td>
+                  <td>
+                    <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                      {item.description}
+                    </Text>
+                  </td>
+                  <td>
+                    <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                      {item.unit}
+                    </Text>
+                  </td>
+                  <td>
+                    <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                      {item.price_per_unit}
+                    </Text>
+                  </td>
+                  <td>
+                    <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                      {item.total_price}
+                    </Text>
+                  </td>
+                  <td>
+                    <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                      {item.quantity}
+                    </Text>
+                  </td>
+                  <td>
+                    <Group spacing="xs">
+                      <Paperclip size="16" />
+                      <Button
+                        color="green"
+                        variant="filled"
+                        component="a"
+                        disabled={!item.docs}
+                        href={item.docs && `${host}/${item.docs}`}
+                        target="_blank"
+                        radius="md"
+                        sx={{
+                          textOverflow: "ellipsis",
+                          maxWidth: "200px",
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        View Docs
+                        {/* {item?.docs.split("/")[3] || "N/A"} */}
+                      </Button>
+                    </Group>
                   </td>
                 </tr>
               ))
@@ -129,14 +167,15 @@ export default function ItemsTable({ setSelectedProposalId, proposaldata }) {
           <Button
             leftIcon={<CaretLeft size={16} />}
             onClick={() => setSelectedProposalId(null)}
-            radius="xl"
+            radius="sm"
+            color="green"
             variant="outline"
           >
             Back
           </Button>
         )}
       </ScrollArea>
-    </Paper>
+    </>
   );
 }
 

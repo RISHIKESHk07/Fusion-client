@@ -34,7 +34,6 @@ export default function EditDraft({ file, onBack, deleteDraft }) {
   const [usernameSuggestions, setUsernameSuggestions] = useState([]);
   const [title, setTitle] = useState(file.file_extra_JSON.subject || "");
   // eslint-disable-next-line no-unused-vars
-  const [subject, setSubject] = useState(file.file_extra_JSON.subject || "");
   const [description, setDescription] = useState(
     file.file_extra_JSON.description || "",
   );
@@ -108,7 +107,7 @@ export default function EditDraft({ file, onBack, deleteDraft }) {
               });
         formData.append("files", fileAttachment); // Append each file
       });
-      formData.append("subject", subject);
+      formData.append("subject", title);
       formData.append("description", description);
       formData.append("designation", designation);
       formData.append("receiver_username", receiver_username);

@@ -281,7 +281,7 @@ export default function Draft() {
           <EditDraft
             file={editFile}
             onBack={handleBack}
-            deleteDraft={(file) => openDeleteModal(file)}
+            deleteDraft={handleDeleteFile}
           />
         ) : (
           <Box
@@ -629,7 +629,7 @@ export default function Draft() {
         {selectedArchiveFile && (
           <>
             <Text mb="ls">
-              Subject: {selectedArchiveFile.file_extra_JSON.subject}
+              Subject: {selectedArchiveFile.file_extra_JSON?.subject}
             </Text>
             <Text mb="md">File ID: #{selectedArchiveFile.id}</Text>
           </>
@@ -668,7 +668,9 @@ export default function Draft() {
         </Text>
         {selectedFile && (
           <>
-            <Text mb="ls">Subject: {selectedFile.file_extra_JSON.subject}</Text>
+            <Text mb="ls">
+              Subject: {selectedFile.file_extra_JSON?.subject}
+            </Text>
             <Text mb="md">File ID: #{selectedFile.id}</Text>
           </>
         )}

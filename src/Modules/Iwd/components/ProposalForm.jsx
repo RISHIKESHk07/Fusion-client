@@ -23,7 +23,7 @@ import classes from "../iwd.module.css";
 import { DesignationsContext } from "../helper/designationContext";
 import { HandleProposalSubmission } from "../handlers/handlers";
 
-function CreateProposalForm({ onBack, request_id, submitter }) {
+function CreateProposalForm({ onBack, request_id, submitter, proposalType }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -177,6 +177,7 @@ function CreateProposalForm({ onBack, request_id, submitter }) {
                   setIsSuccess,
                   submitter,
                   form,
+                  proposalType,
                 });
               }
             })}
@@ -279,6 +280,7 @@ CreateProposalForm.propTypes = {
   onBack: PropTypes.func.isRequired,
   request_id: PropTypes.number.isRequired,
   submitter: PropTypes.func.isRequired,
+  proposalType: PropTypes.string.isRequired,
 };
 
 export default CreateProposalForm;

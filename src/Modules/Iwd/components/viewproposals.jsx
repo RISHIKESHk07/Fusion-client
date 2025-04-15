@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Table, Button, Title, Loader, Flex } from "@mantine/core";
+import { Table, Button, Title, Loader, Flex, Text } from "@mantine/core";
 import PropTypes from "prop-types";
 import { GetItems, GetProposals } from "../handlers/handlers";
 import ItemList from "./ItemsTable";
@@ -29,7 +29,7 @@ function ProposalTable({ requestId, onBack }) {
   };
 
   return (
-    <Container>
+    <div>
       {loading ? (
         <Loader size="lg" />
       ) : !selectedProposalId ? (
@@ -38,40 +38,73 @@ function ProposalTable({ requestId, onBack }) {
           <Table striped highlightOnHover>
             <thead>
               <tr>
-                <th>Proposal ID</th>
-                <th>Current Status</th>
-                <th>Created By</th>
-                <th>Last Updated</th>
-                <th>Created At</th>
-                <th>Proposal Budget</th>
-                <th>Action</th>
+                <th>
+                  <Title size="md">Proposal ID</Title>
+                </th>
+                <th>
+                  <Title size="md">Current Status</Title>
+                </th>
+                <th>
+                  <Title size="md">Created By</Title>
+                </th>
+                <th>
+                  <Title size="md">Last Updated</Title>
+                </th>
+                <th>
+                  <Title size="md">Created At</Title>
+                </th>
+                <th>
+                  <Title size="md">Proposal Budget</Title>
+                </th>
+                <th>
+                  <Title size="md">Action</Title>
+                </th>
               </tr>
             </thead>
             <tbody>
               {proposals.length > 0 ? (
                 proposals.map((proposal) => (
                   <tr key={proposal.id}>
-                    <td>{proposal.id}</td>
-                    <td>{proposal.status}</td>
-                    <td>{proposal.created_by}</td>
                     <td>
-                      {new Date(proposal.updated_at).toLocaleDateString()}
+                      <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                        {proposal.id}
+                      </Text>
                     </td>
                     <td>
-                      {new Date(proposal.created_at).toLocaleDateString()}
+                      <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                        {proposal.status}
+                      </Text>
                     </td>
-                    <td>{proposal.proposal_budget}</td>
+                    <td>
+                      <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                        {proposal.created_by}
+                      </Text>
+                    </td>
+                    <td>
+                      <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                        {new Date(proposal.updated_at).toLocaleDateString()}
+                      </Text>
+                    </td>
+                    <td>
+                      <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                        {new Date(proposal.created_at).toLocaleDateString()}
+                      </Text>
+                    </td>
+                    <td>
+                      <Text style={{ marginTop: "10px", marginBottom: "10px" }}>
+                        {proposal.proposal_budget}
+                      </Text>
+                    </td>
                     <td>
                       <Button
-                        size="xs"
                         onClick={() => handleViewItems(proposal.id)}
-                        style={{
-                          backgroundColor: "#1E90FF",
-                          color: "white",
-                          borderRadius: "20px",
-                        }}
+                        style={{ margin: "10px" }}
+                        variant="filled"
+                        color="green"
                       >
-                        View Items
+                        <Text size="md" fw="bold">
+                          View Items
+                        </Text>
                       </Button>
                     </td>
                   </tr>
@@ -88,14 +121,9 @@ function ProposalTable({ requestId, onBack }) {
           <Flex direction="row" gap="xs" mt="md">
             <Button
               size="sm"
-              variant="light"
-              color="gray"
-              style={{
-                width: "100px",
-                backgroundColor: "#1E90FF",
-                color: "white",
-                borderRadius: "20px",
-              }}
+              color="green"
+              borderRadius="sm"
+              variant="outline"
               onClick={onBack}
             >
               Back
@@ -108,7 +136,7 @@ function ProposalTable({ requestId, onBack }) {
           proposaldata={proposaldata}
         />
       )}
-    </Container>
+    </div>
   );
 }
 

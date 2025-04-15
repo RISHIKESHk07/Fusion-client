@@ -75,12 +75,15 @@ const HandleRequest = async ({
   setIsSuccess(false);
   const token = localStorage.getItem("authToken");
   const data = form.getValues();
+  console.log("\n\n123data aagya hai bhaisab");
+  console.log(data);
   data.role = role;
   console.log(data);
   try {
     const response = await axios.post(IWD_ROUTES.CREATE_REQUESTS, data, {
       headers: {
         Authorization: `Token ${token}`,
+        "Content-Type": "multipart/form-data",
       },
     });
     console.log(response);
@@ -401,6 +404,7 @@ const HandleAdminApproval = async ({
   formData.fileid = request.file_id;
   formData.role = role;
   formData.action = action;
+  console.log(formData);
   try {
     const response = await axios.post(
       IWD_ROUTES.HANDLE_ADMIN_APPROVAL,
@@ -523,29 +527,44 @@ const HandleProposalSubmission = async ({
   setIsSuccess,
   submitter,
   form,
+  proposalType,
 }) => {
   setIsLoading(true);
   setIsSuccess(false);
-
   const token = localStorage.getItem("authToken");
-  const payload = {
-    ...form.values,
-    supporting_documents: form.values.supporting_documents || null,
-    items: form.values.items.map((item) => ({
-      name: item.name,
-      description: item.description,
-      unit: item.unit,
-      price_per_unit: item.price_per_unit,
-      quantity: item.quantity,
-      docs: item.docs || null,
-    })),
-  };
-  console.log(payload);
+  const values = form.getValues();
+  const formData = new FormData();
+
+  formData.append("id", values.id);
+  formData.append("designation", values.designation);
+  formData.append("status", values.status);
+  formData.append("role", values.role);
+
+  if (values.supporting_documents) {
+    formData.append("supporting_documents", values.supporting_documents);
+  }
+
+  values.items.forEach((item, index) => {
+    formData.append(`items[${index}][name]`, item.name);
+    formData.append(`items[${index}][description]`, item.description);
+    formData.append(`items[${index}][unit]`, item.unit);
+    formData.append(`items[${index}][price_per_unit]`, item.price_per_unit);
+    formData.append(`items[${index}][quantity]`, item.quantity);
+    if (item.docs) {
+      formData.append(`items[${index}][docs]`, item.docs);
+    }
+  });
 
   try {
-    const response = await axios.post(IWD_ROUTES.CREATE_PROPOSAL, payload, {
+    const url =
+      proposalType === "create"
+        ? IWD_ROUTES.CREATE_PROPOSAL
+        : IWD_ROUTES.UPDATE_REQUESTS;
+
+    const response = await axios.post(url, formData, {
       headers: {
         Authorization: `Token ${token}`,
+        "Content-Type": "multipart/form-data",
       },
     });
 

@@ -15,7 +15,6 @@ function IwdPage() {
   const filteredTabs = useMemo(() => {
     return roleBasedTabs[role] || tabItems;
   }, [role]);
-  // console.log(filteredTabs);
 
   const handleTabChange = (direction) => {
     const newIndex =
@@ -31,7 +30,6 @@ function IwdPage() {
 
   useEffect(() => {
     const currentTab = filteredTabs[parseInt(activeTab, 10)];
-    // console.log(currentTab);
 
     const breadcrumbs = [
       { title: "Home", href: "/dashboard" },
@@ -42,11 +40,8 @@ function IwdPage() {
         {item.title}
       </Text>
     ));
-    // console.log("bread" ,breadcrumbs);
 
     setBreadcrumbItems(breadcrumbs);
-    // console.log(breadcrumbItems);
-    // console.log(activeTab);
   }, [activeTab, filteredTabs]);
   if (!Object.keys(roleBasedTabs).includes(role)) {
     return (
@@ -58,8 +53,7 @@ function IwdPage() {
     );
   }
   return (
-    <>
-      {/* <Breadcrumbs>{breadcrumbItems}</Breadcrumbs> */}
+    <div style={{ maxHeight: "100vh" }}>
       <CustomBread breadCrumbs={breadcrumbItems} />
       <Flex
         justify="flex-start"
@@ -115,7 +109,7 @@ function IwdPage() {
         </Button>
       </Flex>
       {filteredTabs[parseInt(activeTab, 10)].component}
-    </>
+    </div>
   );
 }
 
