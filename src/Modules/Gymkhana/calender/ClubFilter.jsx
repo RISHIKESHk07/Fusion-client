@@ -12,6 +12,10 @@ function ClubFilter({ selectedClub, setSelectedClub }) {
         { value: "AFC", label: "AFC" },
         { value: "BMC", label: "BMC" },
         { value: "E-Cell", label: "E-Cell" },
+        { value: "Jazbaat", label: "Jazbaat" },
+        { value: "Aavartan", label: "Aavartan" },
+        { value: "Badminton Club", label: "Badminton Club" },
+        { value: "Volleyball Club", label: "Volleyball Club" },
       ]}
       placeholder="Filter by Club"
       style={{

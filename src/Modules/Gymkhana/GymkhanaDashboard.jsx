@@ -84,7 +84,14 @@ function GymkhanaDashboard() {
         >
           <Group justify="end" mb="5px" mr="110px">
             <Select
-              data={["BitByte", "AFC"]}
+              data={[
+                "BitByte",
+                "AFC",
+                "Jazbaat",
+                "Aavartan",
+                "Badminton Club",
+                "Volleyball Club",
+              ]}
               value={value}
               placeholder="Select a Club"
               onChange={setValue}

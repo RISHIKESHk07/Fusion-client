@@ -87,8 +87,8 @@ function EventApprovals({ clubName }) {
 
   const ClubMap = {
     Tech_Counsellor: ["BitByte", "AFC"],
-    Cultural_Counsellor: [],
-    Sports_Counsellor: [],
+    Cultural_Counsellor: ["Jazbaat", "Aavartan"],
+    Sports_Counsellor: ["Badminton Club", "Volleyball Club"],
   };
   console.log(clubName, userRole, VisibeClubArray);
   const filteredEvents = useMemo(() => {
