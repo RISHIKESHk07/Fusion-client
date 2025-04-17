@@ -80,7 +80,7 @@ function ClubViewComponent({
       "Professor",
       "Tech_Counsellor",
       "Sports_Counsellor",
-      "Cutural_Counsellor",
+      "Cultural_Counsellor",
     ].includes(userRole) &&
     CurrentLogginedRelatedClub.length > 0 &&
     VisibeClubArray.includes(clubName)
