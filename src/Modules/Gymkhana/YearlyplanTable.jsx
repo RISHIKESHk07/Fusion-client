@@ -345,7 +345,7 @@ function YearlyApprovals({ clubName }) {
 
     if (selectedEvent.status === "FIC" && userRole === "FIC") {
       return (
-        <>
+        <Flex justify="center" gap={5}>
           <Button
             color="blue"
             onClick={() =>
@@ -360,7 +360,7 @@ function YearlyApprovals({ clubName }) {
           >
             Reject
           </Button>
-        </>
+        </Flex>
       );
     }
     if (
@@ -484,17 +484,28 @@ function YearlyApprovals({ clubName }) {
             }}
           >
             <Box>
-              {selectedEvent.club} Yearly Plan
+              <Text size="lg">{selectedEvent.club} Yearly Plan</Text>
+              <Divider my="md" />
               {selectedEvent.events.map((eve) => {
                 // Add your logic to display the event details here
                 return (
                   <Box key={`${eve.id}-${eve.event_name}`}>
-                    <Text>{eve.event_name}</Text>
-                    <Text>{eve.tentative_start_date}</Text>
-                    <Text>{eve.tentative_end_date}</Text>
-                    <Text>{eve.description}</Text>
-                    <Text>{eve.budget}</Text>
-                    <Divider my="sm" />
+                    <Text fw={700} size="sm">
+                      Event Name:{eve.event_name}
+                    </Text>
+                    <Text fw={700} size="sm">
+                      Tentative start date:{eve.tentative_start_date}
+                    </Text>
+                    <Text fw={700} size="sm">
+                      Tentative end date:{eve.tentative_end_date}
+                    </Text>
+                    <Text fw={700} size="sm">
+                      Description:{eve.description}
+                    </Text>
+                    <Text fw={700} size="sm">
+                      Budget:{eve.budget}
+                    </Text>
+                    <Divider my="md" />
                   </Box>
                 );
               })}
